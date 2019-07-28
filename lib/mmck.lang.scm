@@ -31,6 +31,7 @@
 ;;;; units and module header
 
 (declare (unit mmck.lang)
+	 (uses mmck.lang.debug)
 	 (uses mmck.lang.core)
 	 (uses mmck.lang.version)
 	 (emit-import-library mmck.lang))
@@ -38,6 +39,7 @@
 (module (mmck.lang)
     ()
   (import (only (chicken module) reexport))
+  (reexport (mmck.lang.debug))
   (reexport (mmck.lang.core))
   (reexport (mmck.lang.version))
   #| end of module |# )

@@ -144,6 +144,11 @@ included in the section entitled ``@gnu{} Free Documentation License''.
 @menu
 * overview::                    Overview of the package.
 * version::                     Version functions.
+* debug::                       Basic debugging facilities.
+* binding::                     Binding syntaxes.
+* expr::                        Expression syntaxes.
+* lists::                       List functions.
+* vectors::                     Vector functions.
 
 Appendices
 
@@ -256,6 +261,33 @@ Return a string representing the package's semantic version.  As example, if the
 version is @samp{1.2.3-devel.0+x86-64}: the package version is the string
 @samp{"v1.2.3-devel.0+x86-64"}, notice the leading character @samp{v}.
 @end defun
+
+@c page
+@node debug
+@chapter Basic debugging facilities
+
+
+@defun debug-print @var{obj} @dots{}
+Gather all the @var{obj} values in a list and print it the value of @code{(current-error-port)},
+followed by a newline character.
+@end defun
+
+@c page
+@node binding
+@chapter Binding syntaxes
+
+@c page
+@node expr
+@chapter Expression syntaxes
+
+@c page
+@node lists
+@chapter List functions
+
+@c page
+@node vectors
+@chapter Vector functions
+
 
 @c page
 @c ------------------------------------------------------------

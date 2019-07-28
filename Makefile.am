@@ -126,6 +126,53 @@ lib/mmck.lang.version.import.$(MMCK_SOEXT): lib/mmck.lang.version.import.scm
 	$(MMCK_LIB_ENV) $(CSC_COMPILE_LIBRARY) $(@) $(<)
 
 
+#### library (mmck lang): module debug
+
+MMCK_LANG_MODULES		+= lib/mmck.lang.debug.scm
+MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.debug.$(OBJEXT)
+MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.debug.import.scm
+MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.debug.import.$(MMCK_SOEXT)
+MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.debug.import.$(MMCK_SOEXT)
+MMCK_LANG_TEMP_FILES		+= \
+	lib/mmck.lang.debug.temp	\
+	lib/mmck.lang.debug.lock	\
+	lib/mmck.lang.debug.stamp
+
+MMCK_LANG_DEBUG_DEPS = \
+	$(MMCK_OBJECTS_DEPS)
+
+lib/mmck.lang.debug.stamp: lib/mmck.lang.debug.scm $(MMCK_LANG_DEBUG_DEPS)
+	@rm -f lib/mmck.lang.debug.temp
+	@touch lib/mmck.lang.debug.temp
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.debug.$(OBJEXT) $(<)
+	@$(MV) mmck.lang.debug.import.scm lib/mmck.lang.debug.import.scm
+	@mv -f lib/mmck.lang.debug.temp $@
+
+lib/mmck.lang.debug.import.scm lib/mmck.lang.debug.$(OBJEXT): lib/mmck.lang.debug.stamp
+	@dry=; for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=*|--*);; \
+	    *n*) dry=:;; \
+	  esac; \
+	done; \
+	if test -f $@; then :; else \
+	  $$dry trap 'rm -rf lib/mmck.lang.debug.lock lib/mmck.lang.debug.stamp' 1 2 13 15; \
+	  if $$dry mkdir lib/mmck.lang.debug.lock 2>/dev/null; then \
+	    $$dry rm -f lib/mmck.lang.debug.stamp; \
+	    $(MAKE) $(AM_MAKEFLAGS) lib/mmck.lang.debug.stamp; \
+	    $$dry rmdir lib/mmck.lang.debug.lock; \
+	  else \
+	    while test -d lib/mmck.lang.debug.lock && test -z "$$dry"; do \
+	      sleep 1; \
+	    done; \
+	    $$dry test -f lib/mmck.lang.debug.stamp; exit $$?; \
+	  fi; \
+	fi
+
+lib/mmck.lang.debug.import.$(MMCK_SOEXT): lib/mmck.lang.debug.import.scm
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_LIBRARY) $(@) $(<)
+
+
 #### library (mmck lang): module core
 
 MMCK_LANG_MODULES		+= lib/mmck.lang.core.scm
@@ -139,6 +186,7 @@ MMCK_LANG_TEMP_FILES		+= \
 	lib/mmck.lang.core.stamp
 
 MMCK_LANG_CORE_DEPS = \
+	lib/mmck.lang.debug.$(OBJEXT)		\
 	$(MMCK_OBJECTS_DEPS)
 
 lib/mmck.lang.core.stamp: lib/mmck.lang.core.scm $(MMCK_LANG_CORE_DEPS)

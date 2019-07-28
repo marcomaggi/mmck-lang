@@ -32,8 +32,7 @@
     ()
   (import (scheme)
 	  (mmck lang)
-	  (mmck checks)
-	  (chicken pretty-print))
+	  (mmck checks))
 
 (check-set-mode! 'report-failed)
 (check-display "*** testing version functions\n")
@@ -41,13 +40,13 @@
 
 (parameterise ((check-test-name		'versions))
 
-  (pretty-print (list 'mmck-lang-package-major-version	(mmck-lang-package-major-version)))
-  (pretty-print (list 'mmck-lang-package-minor-version	(mmck-lang-package-minor-version)))
-  (pretty-print (list 'mmck-lang-package-patch-level	(mmck-lang-package-patch-level)))
-  (pretty-print (list 'mmck-lang-package-prerelease-tag	(mmck-lang-package-prerelease-tag)))
-  (pretty-print (list 'mmck-lang-package-build-metadata	(mmck-lang-package-build-metadata)))
-  (pretty-print (list 'mmck-lang-package-version		(mmck-lang-package-version)))
-  (pretty-print (list 'mmck-lang-package-semantic-version	(mmck-lang-package-semantic-version)))
+  (debug-print (list 'mmck-lang-package-major-version	(mmck-lang-package-major-version)))
+  (debug-print (list 'mmck-lang-package-minor-version	(mmck-lang-package-minor-version)))
+  (debug-print (list 'mmck-lang-package-patch-level	(mmck-lang-package-patch-level)))
+  (debug-print (list 'mmck-lang-package-prerelease-tag	(mmck-lang-package-prerelease-tag)))
+  (debug-print (list 'mmck-lang-package-build-metadata	(mmck-lang-package-build-metadata)))
+  (debug-print (list 'mmck-lang-package-version		(mmck-lang-package-version)))
+  (debug-print (list 'mmck-lang-package-semantic-version	(mmck-lang-package-semantic-version)))
 
   (check-for-true		(number? (mmck-lang-package-major-version)))
   (check-for-true		(number? (mmck-lang-package-minor-version)))
