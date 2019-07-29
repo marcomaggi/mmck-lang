@@ -12,7 +12,7 @@
 @c Values.
 @c ------------------------------------------------------------
 
-@set TITLE                      Lang for @sc{chicken}
+@set TITLE                      Language extensions for @sc{chicken}
 
 @c To be used as @value{PACKAGE} whenever we need to include the full
 @c name of this package.
