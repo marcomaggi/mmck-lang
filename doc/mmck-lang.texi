@@ -159,6 +159,7 @@ included in the section entitled ``@gnu{} Free Documentation License''.
 * expr::                        Expression syntaxes.
 * lists::                       List functions.
 * vectors::                     Vector functions.
+* strings::                     String functions.
 
 Appendices
 
@@ -782,9 +783,19 @@ values returned by @qvar{expr}.
 @node lists
 @chapter List functions
 
+
+
+
+
 @c page
 @node vectors
 @chapter Vector functions
+
+
+@c page
+@node strings
+@chapter String functions
+
 
 
 @c page
