@@ -33,6 +33,9 @@
 (declare (unit mmck.lang)
 	 (uses mmck.lang.debug)
 	 (uses mmck.lang.core)
+	 (uses mmck.lang.lists)
+	 (uses mmck.lang.vectors)
+	 (uses mmck.lang.strings)
 	 (uses mmck.lang.version)
 	 (emit-import-library mmck.lang))
 
@@ -41,6 +44,9 @@
   (import (only (chicken module) reexport))
   (reexport (mmck.lang.debug))
   (reexport (mmck.lang.core))
+  (reexport (mmck.lang.lists))
+  (reexport (mmck.lang.vectors))
+  (reexport (mmck.lang.strings))
   (reexport (mmck.lang.version))
   #| end of module |# )
 
