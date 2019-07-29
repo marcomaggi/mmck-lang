@@ -31,15 +31,44 @@
 	 (emit-import-library mmck.lang.vectors))
 
 (module (mmck.lang.vectors)
-    ()
+    (
+     ;; unsafe operations
+     (syntax: $vector-ref)
+     (syntax: $vector-set!)
+     (syntax: $vector-set-immediate!)
+     (syntax: $vector-length)
+     )
   (import (scheme)
 	  (mmck lang core)
 	  (mmck lang debug))
 
 
-;;;;
+;;;; unsafe operations
 
+(define-syntax-rule ($vector-ref ?vector ?slot-index)
+  ;;Unsafe implementation of VECTOR-REF.  To be used when  we know that: ?VECTOR is a vector object;
+  ;;?SLOT-INDEX is a valid slot index for ?VECTOR.
+  ;;
+  (##sys#slot ?vector ?slot-index))
 
+(define-syntax-rule ($vector-set! ?vector ?slot-index ?new-value)
+  ;;Unsafe implementation of VECTOR-REF.  To be used when  we know that: ?VECTOR is a vector object;
+  ;;?SLOT-INDEX is a valid slot index for ?VECTOR.
+  ;;
+  (##sys#setslot ?vector ?slot-index ?new-value))
+
+(define-syntax-rule ($vector-set-immediate! ?vector ?slot-index ?new-immediate-value)
+  ;;Unsafe implementation of VECTOR-REF.  To be used when  we know that: ?VECTOR is a vector object;
+  ;;?SLOT-INDEX  is a  valid slot  index for  ?VECTOR; ?NEW-IMMEDIATE-VALUE  is an  immediate Scheme
+  ;;value.
+  ;;
+  (##sys#setislot ?vector ?slot-index ?new-immediate-value))
+
+(define-syntax-rule ($vector-length ?vector)
+  ;;Unsafe implementation  of VECTOR-LENGTH.   To be  used when we  know that:  ?VECTOR is  a vector
+  ;;object.
+  ;;
+  (##sys#size ?vector))
 
 
 ;;;; done

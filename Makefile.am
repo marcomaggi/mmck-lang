@@ -498,6 +498,42 @@ tests/test-lang-core.$(OBJEXT): tests/test-lang-core.scm $(MMCK_CHECK_DEPS)
 tests/test-lang-core.exe: tests/test-lang-core.$(OBJEXT)
 	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
 
+## --------------------------------------------------------------------
+
+EXTRA_DIST		+= tests/test-lang-lists.scm
+MMCK_CHECK_OBJECTS	+= tests/test-lang-lists.$(OBJEXT)
+MMCK_CHECK_PROGS	+= tests/test-lang-lists.exe
+
+tests/test-lang-lists.$(OBJEXT): tests/test-lang-lists.scm $(MMCK_CHECK_DEPS)
+	$(MMCK_CHECK_ENV) $(CSC_COMPILE_OBJECT_STATIC) $(@) $(<)
+
+tests/test-lang-lists.exe: tests/test-lang-lists.$(OBJEXT)
+	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
+
+## --------------------------------------------------------------------
+
+EXTRA_DIST		+= tests/test-lang-vectors.scm
+MMCK_CHECK_OBJECTS	+= tests/test-lang-vectors.$(OBJEXT)
+MMCK_CHECK_PROGS	+= tests/test-lang-vectors.exe
+
+tests/test-lang-vectors.$(OBJEXT): tests/test-lang-vectors.scm $(MMCK_CHECK_DEPS)
+	$(MMCK_CHECK_ENV) $(CSC_COMPILE_OBJECT_STATIC) $(@) $(<)
+
+tests/test-lang-vectors.exe: tests/test-lang-vectors.$(OBJEXT)
+	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
+
+## --------------------------------------------------------------------
+
+EXTRA_DIST		+= tests/test-lang-strings.scm
+MMCK_CHECK_OBJECTS	+= tests/test-lang-strings.$(OBJEXT)
+MMCK_CHECK_PROGS	+= tests/test-lang-strings.exe
+
+tests/test-lang-strings.$(OBJEXT): tests/test-lang-strings.scm $(MMCK_CHECK_DEPS)
+	$(MMCK_CHECK_ENV) $(CSC_COMPILE_OBJECT_STATIC) $(@) $(<)
+
+tests/test-lang-strings.exe: tests/test-lang-strings.$(OBJEXT)
+	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
+
 
 #### wrapping up tests
 

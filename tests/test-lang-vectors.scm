@@ -1,12 +1,12 @@
 ;;; -*- coding: utf-8-unix  -*-
 ;;;
 ;;;Part of: MMCK Lang
-;;;Contents: strings module
+;;;Contents: test program vector functions
 ;;;Date: Jul 29, 2019
 ;;;
 ;;;Abstract
 ;;;
-;;;	This unit defines more facilities to handle strings.
+;;;	This program tests vector functions.
 ;;;
 ;;;Copyright (C) 2019 Marco Maggi <mrc.mgg@gmail.com>
 ;;;
@@ -25,31 +25,33 @@
 
 ;;;; units and module header
 
-(declare (unit mmck.lang.strings)
-	 (uses mmck.lang.core)
-	 (uses mmck.lang.debug)
-	 (emit-import-library mmck.lang.strings))
-
-(module (mmck.lang.strings)
-    (
-     ;; unsafe operations
-     (syntax: $string-length)
-     )
+(module (test-lang-vectors)
+    ()
   (import (scheme)
-	  (mmck lang core)
-	  (mmck lang debug))
+	  (mmck lang)
+	  (mmck exceptional-conditions)
+	  (mmck checks))
+
+(check-set-mode! 'report-failed)
+(check-display "*** testing language extensions: vector functions\n")
 
 
-;;;; unsafe operations
+(parameterise ((check-test-name		'unsafe))
 
-(define-syntax-rule ($string-length ?string)
-  ;;Unsafe implementation  of STRING-LENGTH.   To be  used when we  know that:  ?STRING is  a string
-  ;;object.
-  ;;
-  (##sys#size ?string))
+  (check
+      (let ((vec	'#(1 2 3)))
+	(values ($vector-length vec)
+		($vector-ref vec 0)
+		($vector-ref vec 1)
+		($vector-ref vec 2)))
+    => 3 1 2 3)
+
+  (values))
 
 
 ;;;; done
+
+(check-report)
 
 #| end of module |# )
 
