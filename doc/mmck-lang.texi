@@ -779,6 +779,11 @@ values returned by @qvar{expr}.
 @end lisp
 @end deffn
 
+
+@deffn Syntax xor @qvar{expr} @dots{}
+Exclusive OR.
+@end deffn
+
 @c page
 @node lists
 @chapter List functions
