@@ -235,6 +235,7 @@ MMCK_LANG_TEMP_FILES		+= \
 
 MMCK_LANG_BOOLEANS_DEPS = \
 	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
+	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
 	$(MMCK_OBJECTS_DEPS)
 
 lib/mmck.lang.booleans.stamp: lib/mmck.lang.booleans.scm $(MMCK_LANG_BOOLEANS_DEPS)
