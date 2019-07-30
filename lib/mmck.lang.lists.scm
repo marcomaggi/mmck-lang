@@ -31,13 +31,88 @@
 	 (emit-import-library mmck.lang.lists))
 
 (module (mmck.lang.lists)
-    ()
+    (
+     ;; unsafe operations
+
+     ;; constructors
+     cons*
+     make-list
+
+     ;; iteration
+     fold-left
+     fold-right
+     exists
+     for-all
+     )
   (import (scheme)
+	  (only (chicken fixnum)
+		fx=
+		fx<
+		fx<=
+		fx+
+		fx-)
 	  (mmck lang core)
 	  (mmck lang debug))
 
 
+;;;; unsafe operations
+
+
+
+
 ;;;;
+
+(case-define cons*
+  ((item)
+   item)
+  ((item ell)
+   (cons item ell))
+  ((item1 item2 ell)
+   (cons item1 (cons item2 ell)))
+  ((item . rest)
+   (let loop ((item	item)
+	      (rest	rest))
+     (if (null? rest)
+	 item
+       (cons item (loop (car rest) (cdr rest)))))))
+
+(define (make-list len fill)
+  (if (fx= 0 len)
+      '()
+    (cons fill (make-list (- len 1) fill))))
+
+(define (fold-left combine nil ell)
+  (if (pair? ell)
+      (fold-left combine (combine nil (car ell)) (cdr ell))
+    nil))
+
+(define (fold-right combine nil ell)
+  (let loop ((combine	combine)
+	     (nil	nil)
+	     (ell	(reverse ell)))
+    (if (pair? ell)
+	(loop combine (combine (car ell) nil) (cdr ell))
+      nil)))
+
+(define (exists pred ell)
+  (and (pair? ell)
+       (or (pred (car ell))
+	   (exists pred (cdr ell)))))
+
+(case-define for-all
+  ((pred ell)
+   (if (pair? ell)
+       (if (pred (car ell))
+	   (for-all pred (cdr ell))
+	 #f)
+     #t))
+  ((pred ell1 ell2)
+   (if (and (pair? ell1)
+	    (pair? ell2))
+       (if (pred (car ell1) (car ell2))
+	   (for-all pred (cdr ell1) (cdr ell2))
+	 #f)
+     #t)))
 
 
 

@@ -39,7 +39,17 @@
      (syntax: $vector-length)
      )
   (import (scheme)
+	  (only (chicken base)
+		when)
+	  (only (chicken fixnum)
+		fx=
+		fx<
+		fx<=
+		fx+
+		fx-)
 	  (mmck lang core)
+	  (only (mmck lang lists)
+		fold-left)
 	  (mmck lang debug))
 
 
@@ -69,6 +79,71 @@
   ;;object.
   ;;
   (##sys#size ?vector))
+
+
+;;;; operations
+
+(define (vector-copy dst.vec dst.start src.vec src.start src.end)
+  (do ((i dst.start (fx+ 1 i))
+       (j src.start (fx+ 1 j)))
+      ((fx= j src.end))
+    ($vector-set! dst.vec i ($vector-ref src.vec j))))
+
+(define (vector-append . vecs)
+  (receive-and-return (dst.vec)
+      (make-vector (fold-left (lambda (nil vec)
+				(+ nil ($vector-length vec)))
+		     0 vecs))
+    (fold-left (lambda (dst.idx src.vec)
+		 (let ((src.len ($vector-length src.vec)))
+		   (vector-copy dst.vec dst.idx src.vec 0 src.len)
+		   (fx+ dst.idx src.len)))
+      0 vecs)))
+
+(case-define vector-map-to-list
+  ((func vec)
+   (let loop ((i	(fx- ($vector-length vec) 1))
+	      (result	'()))
+     (if (fx<= 0 i)
+	 (loop (fx- i 1) (cons (func ($vector-ref vec i)) result))
+       result)))
+
+  ((func vec1 vec2)
+   (let loop ((i	(fx- ($vector-length vec1) 1))
+	      (result	'()))
+     (if (<= 0 i)
+	 (loop (fx- i 1) (cons (func ($vector-ref vec1 i)
+				     ($vector-ref vec2 i))
+			       result))
+       result))))
+
+(case-define vector-for-each
+  ((func vec)
+   (do ((i 0 (fx+ 1 i)))
+       ((fx= i ($vector-length vec)))
+     (func i ($vector-ref vec i))))
+
+  ((func vec1 vec2)
+   (do ((i 0 (fx+ 1 i)))
+       ((fx= i ($vector-length vec1)))
+     (func i
+	   ($vector-ref vec1 i)
+	   ($vector-ref vec2 i)))))
+
+(define (vector-for-all pred vec)
+  (let loop ((i 0))
+    (cond ((fx= i ($vector-length vec))
+	   #t)
+	  ((pred ($vector-ref vec i))
+	   (loop (fx+ 1 i)))
+	  (else
+	   #f))))
+
+(define (vector-for-each-index func vec)
+  (let loop ((idx 0))
+    (when (fx< idx ($vector-length vec))
+      (func idx ($vector-ref vec idx))
+      (loop (fx+ 1 idx)))))
 
 
 ;;;; done

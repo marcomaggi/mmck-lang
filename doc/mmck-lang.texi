@@ -157,6 +157,7 @@ included in the section entitled ``@gnu{} Free Documentation License''.
 * debug::                       Basic debugging facilities.
 * binding::                     Binding syntaxes.
 * expr::                        Expression syntaxes.
+* booleans::                    Boolean functions.
 * lists::                       List functions.
 * vectors::                     Vector functions.
 * strings::                     String functions.
@@ -785,6 +786,16 @@ Exclusive OR.
 @end deffn
 
 @c page
+@node booleans
+@chapter Boolean functions
+
+
+@deffn Syntax boolean-true? @qvar{obj}
+@deffnx Syntax boolean-false? @qvar{obj}
+Predicates for the boolean objects @true{} and @false{}.
+@end deffn
+
+@c page
 @node lists
 @chapter List functions
 
@@ -797,11 +808,61 @@ Exclusive OR.
 @chapter Vector functions
 
 
+@menu
+* vectors unsafe::              Unsafe operations on vectors.
+@end menu
+
+@c page
+@node vectors unsafe
+@section Unsafe operations on vectors
+
+
+@deffn {Unsafe Operation} $vector-length @var{vec}
+The argument @var{vec} must be a vector object.  Return a non--negative fixnum representing the
+length of the vector @var{vec}.
+@end deffn
+
+
+@deffn {Unsafe Operation} $vector-ref @var{vec} @var{fxidx}
+The argument @var{vec} must be a vector object.  The argument @var{fxidx} must be a non--negative
+integer representing a valid index in the vector @var{vec}.  Return the object at index @var{fxidx}
+in the vector @var{vec}.
+@end deffn
+
+
+@deffn {Unsafe Operation} $vector-set! @var{vec} @var{fxidx} @var{obj}
+The argument @var{vec} must be a vector object.  The argument @var{fxidx} must be a non--negative
+integer representing a valid index in the vector @var{vec}.  Store the object @var{obj} at index
+@var{fxidx} in the vector @var{vec}; return unspecified values.
+@end deffn
+
+
+@deffn {Unsafe Operation} $vector-set-immediate! @var{vec} @var{fxidx} @var{imm-obj}
+The argument @var{vec} must be a vector object.  The argument @var{fxidx} must be a non--negative
+integer representing a valid index in the vector @var{vec}.  Store the immediate object
+@var{imm-obj} at index @var{fxidx} in the vector @var{vec}; return unspecified values.  This
+operation is a bit faster than @func{$vector-set!}.
+@end deffn
+
+
 @c page
 @node strings
 @chapter String functions
 
 
+@menu
+* strings unsafe::              Unsafe operations on strings.
+@end menu
+
+@c page
+@node strings unsafe
+@section Unsafe operations on strings
+
+
+@deffn {Unsafe Operation} $string-length @var{str}
+The argument @var{str} must be a string object.  Return a non--negative fixnum representing the
+length of the string @var{str}.
+@end deffn
 
 @c page
 @c ------------------------------------------------------------
