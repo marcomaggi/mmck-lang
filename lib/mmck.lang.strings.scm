@@ -26,8 +26,9 @@
 ;;;; units and module header
 
 (declare (unit mmck.lang.strings)
-	 (uses mmck.lang.core)
 	 (uses mmck.lang.debug)
+	 (uses mmck.lang.core)
+	 (uses mmck.lang.assertions)
 	 (emit-import-library mmck.lang.strings))
 
 (module (mmck.lang.strings)
@@ -36,8 +37,9 @@
      (syntax: $string-length)
      )
   (import (scheme)
+	  (mmck lang debug)
 	  (mmck lang core)
-	  (mmck lang debug))
+	  (mmck lang assertions))
 
 
 ;;;; unsafe operations

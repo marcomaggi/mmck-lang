@@ -27,6 +27,7 @@
 
 (declare (unit mmck.lang.booleans)
 	 (uses mmck.lang.core)
+	 (uses mmck.lang.assertions)
 	 (uses mmck.lang.debug)
 	 (emit-import-library mmck.lang.booleans))
 
@@ -34,8 +35,9 @@
     (boolean-true?
      boolean-false?)
   (import (scheme)
+	  (mmck lang debug)
 	  (mmck lang core)
-	  (mmck lang debug))
+	  (mmck lang assertions))
 
 
 ;;;; predicates

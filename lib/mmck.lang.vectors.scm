@@ -26,9 +26,10 @@
 ;;;; units and module header
 
 (declare (unit mmck.lang.vectors)
-	 (uses mmck.lang.core)
-	 (uses mmck.lang.lists)
 	 (uses mmck.lang.debug)
+	 (uses mmck.lang.core)
+	 (uses mmck.lang.assertions)
+	 (uses mmck.lang.lists)
 	 (emit-import-library mmck.lang.vectors))
 
 (module (mmck.lang.vectors)
@@ -48,10 +49,11 @@
 		fx<=
 		fx+
 		fx-)
+	  (mmck lang debug)
 	  (mmck lang core)
+	  (mmck lang assertions)
 	  (only (mmck lang lists)
-		fold-left)
-	  (mmck lang debug))
+		fold-left))
 
 
 ;;;; unsafe operations

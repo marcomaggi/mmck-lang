@@ -221,6 +221,55 @@ lib/mmck.lang.core.import.$(MMCK_SOEXT): lib/mmck.lang.core.import.scm
 	$(MMCK_LIB_ENV) $(CSC_COMPILE_LIBRARY) $(@) $(<)
 
 
+#### library (mmck lang): module assertions
+
+MMCK_LANG_MODULES		+= lib/mmck.lang.assertions.scm
+MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.assertions.$(OBJEXT)
+MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.assertions.import.scm
+MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.assertions.import.$(MMCK_SOEXT)
+MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.assertions.import.$(MMCK_SOEXT)
+MMCK_LANG_TEMP_FILES		+= \
+	lib/mmck.lang.assertions.temp	\
+	lib/mmck.lang.assertions.lock	\
+	lib/mmck.lang.assertions.stamp
+
+MMCK_LANG_ASSERTIONS_DEPS = \
+	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
+	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
+	$(MMCK_OBJECTS_DEPS)
+
+lib/mmck.lang.assertions.stamp: lib/mmck.lang.assertions.scm $(MMCK_LANG_ASSERTIONS_DEPS)
+	@rm -f lib/mmck.lang.assertions.temp
+	@touch lib/mmck.lang.assertions.temp
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.assertions.$(OBJEXT) $(<)
+	@$(MV) mmck.lang.assertions.import.scm lib/mmck.lang.assertions.import.scm
+	@mv -f lib/mmck.lang.assertions.temp $@
+
+lib/mmck.lang.assertions.import.scm lib/mmck.lang.assertions.$(OBJEXT): lib/mmck.lang.assertions.stamp
+	@dry=; for f in x $$MAKEFLAGS; do \
+	  case $$f in \
+	    *=*|--*);; \
+	    *n*) dry=:;; \
+	  esac; \
+	done; \
+	if test -f $@; then :; else \
+	  $$dry trap 'rm -rf lib/mmck.lang.assertions.lock lib/mmck.lang.assertions.stamp' 1 2 13 15; \
+	  if $$dry mkdir lib/mmck.lang.assertions.lock 2>/dev/null; then \
+	    $$dry rm -f lib/mmck.lang.assertions.stamp; \
+	    $(MAKE) $(AM_MAKEFLAGS) lib/mmck.lang.assertions.stamp; \
+	    $$dry rmdir lib/mmck.lang.assertions.lock; \
+	  else \
+	    while test -d lib/mmck.lang.assertions.lock && test -z "$$dry"; do \
+	      sleep 1; \
+	    done; \
+	    $$dry test -f lib/mmck.lang.assertions.stamp; exit $$?; \
+	  fi; \
+	fi
+
+lib/mmck.lang.assertions.import.$(MMCK_SOEXT): lib/mmck.lang.assertions.import.scm
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_LIBRARY) $(@) $(<)
+
+
 #### library (mmck lang): module booleans
 
 MMCK_LANG_MODULES		+= lib/mmck.lang.booleans.scm
@@ -236,6 +285,7 @@ MMCK_LANG_TEMP_FILES		+= \
 MMCK_LANG_BOOLEANS_DEPS = \
 	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
+	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
 	$(MMCK_OBJECTS_DEPS)
 
 lib/mmck.lang.booleans.stamp: lib/mmck.lang.booleans.scm $(MMCK_LANG_BOOLEANS_DEPS)
@@ -285,6 +335,7 @@ MMCK_LANG_TEMP_FILES		+= \
 MMCK_LANG_LISTS_DEPS = \
 	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
+	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
 	$(MMCK_OBJECTS_DEPS)
 
 lib/mmck.lang.lists.stamp: lib/mmck.lang.lists.scm $(MMCK_LANG_LISTS_DEPS)
@@ -335,6 +386,7 @@ MMCK_LANG_VECTORS_DEPS = \
 	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
 	lib/mmck.lang.lists.import.$(MMCK_SOEXT)	\
+	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
 	$(MMCK_OBJECTS_DEPS)
 
 lib/mmck.lang.vectors.stamp: lib/mmck.lang.vectors.scm $(MMCK_LANG_VECTORS_DEPS)
@@ -384,6 +436,7 @@ MMCK_LANG_TEMP_FILES		+= \
 MMCK_LANG_STRINGS_DEPS = \
 	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
+	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
 	$(MMCK_OBJECTS_DEPS)
 
 lib/mmck.lang.strings.stamp: lib/mmck.lang.strings.scm $(MMCK_LANG_STRINGS_DEPS)

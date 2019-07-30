@@ -26,8 +26,9 @@
 ;;;; units and module header
 
 (declare (unit mmck.lang.lists)
-	 (uses mmck.lang.core)
 	 (uses mmck.lang.debug)
+	 (uses mmck.lang.core)
+	 (uses mmck.lang.assertions)
 	 (emit-import-library mmck.lang.lists))
 
 (module (mmck.lang.lists)
@@ -46,13 +47,10 @@
      )
   (import (scheme)
 	  (only (chicken fixnum)
-		fx=
-		fx<
-		fx<=
-		fx+
-		fx-)
+		fx=)
+	  (mmck lang debug)
 	  (mmck lang core)
-	  (mmck lang debug))
+	  (mmck lang assertions))
 
 
 ;;;; unsafe operations
