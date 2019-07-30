@@ -70,7 +70,9 @@
 		reexport))
   (reexport (only (chicken base)
 		  case-lambda
-		  receive))
+		  receive
+		  unless
+		  when))
   (import-for-syntax (scheme)
 		     (only (chicken syntax)
 			   ir-macro-transformer

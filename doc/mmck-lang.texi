@@ -161,6 +161,7 @@ included in the section entitled ``@gnu{} Free Documentation License''.
 * lists::                       List functions.
 * vectors::                     Vector functions.
 * strings::                     String functions.
+* parameters::                  Parameter functions and syntaxes.
 
 Appendices
 
@@ -709,6 +710,7 @@ condition types compatible with @rnrs{6}}).
 @menu
 * expr named-lambda::           The syntax @syntax{named-lambda}.
 * expr misc::                   Miscellaneous expression syntaxes.
+* expr reexports::              Reexported syntactic bindings.
 @end menu
 
 @c page
@@ -784,6 +786,24 @@ values returned by @qvar{expr}.
 @deffn Syntax xor @qvar{expr} @dots{}
 Exclusive OR.
 @end deffn
+
+@c page
+@node expr reexports
+@section Reexported syntactic bindings
+
+
+@cindex Reexported syntactic bindings
+@findex @syntax{when}, reexported syntactic binding
+@findex @syntax{unless}, reexported syntactic binding
+
+
+The library @library{mmck lang} reexports the following syntactic bindings from @library{chicken
+base}:
+
+@lisp
+when
+unless
+@end lisp
 
 @c page
 @node booleans
@@ -863,6 +883,27 @@ operation is a bit faster than @func{$vector-set!}.
 The argument @var{str} must be a string object.  Return a non--negative fixnum representing the
 length of the string @var{str}.
 @end deffn
+
+@c page
+@node parameters
+@chapter Parameter functions and syntaxes
+
+
+The library @library{mmck lang} reexports from @library{chicken base} some syntactic bindings
+forming the parameters @api{}, @ChickenCoreRef{base parms, Parameters}.
+
+
+@deffn Syntax parameterize ((@qvar{param} @qvar{param-expr}) @dots{}) @qvaro{expr} @qvar{expr} @dots{}
+@deffnx Syntax parameterise ((@qvar{param} @qvar{param-expr}) @dots{}) @qvaro{expr} @qvar{expr} @dots{}
+The syntactic binding @syntax{parameterize} is reexported from @library{chicken base}.  The
+syntactic binding @syntax{parameterise} is an alias for @syntax{parameterize}.
+@end deffn
+
+
+@defun make-parameter @var{obj}
+@defunx make-parameter @var{obj} @var{guard}
+Build a new parameter.  It is reexported from @library{chicken base}.
+@end defun
 
 @c page
 @c ------------------------------------------------------------
