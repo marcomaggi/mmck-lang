@@ -53,7 +53,7 @@
 (declare (unit mmck.lang.core)
 	 (emit-import-library mmck.lang.core))
 
-(module (mmck.lang.core)
+(module (mmck lang core)
     ((syntax: define-syntax-rule)
      (syntax: define*)
      (syntax: case-define)

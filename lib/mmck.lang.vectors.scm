@@ -27,6 +27,7 @@
 
 (declare (unit mmck.lang.vectors)
 	 (uses mmck.lang.core)
+	 (uses mmck.lang.lists)
 	 (uses mmck.lang.debug)
 	 (emit-import-library mmck.lang.vectors))
 
