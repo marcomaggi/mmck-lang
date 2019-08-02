@@ -889,9 +889,9 @@ the syntactic binding exported by @library{chicken base}.
 @section List predicates
 
 
-@defun list-of-lists? @var{objs}
-Return @true{} if @var{objs} is a (possibly empty) list of (possibly empty) lists; otherwise return
-@false{}.  Notice that this function returns null if @var{objs} is not null or a proper list of
+@defun list-of-lists? @var{obj}
+Return @true{} if @var{obj} is a (possibly empty) list of (possibly empty) lists; otherwise return
+@false{}.  Notice that this function returns null if @var{obj} is neither null nor a proper list of
 pairs.
 
 @lisp
@@ -911,6 +911,116 @@ pairs.
 @end lisp
 @end defun
 
+
+@defun list-of-nulls? @var{obj}
+Return @true{} if @var{obj} is a (possibly empty) list of null objects; otherwise return @false{}.
+Notice that this function returns @false{} if @var{obj} is neither null nor a proper list of nulls.
+
+@lisp
+(list-of-nulls? '())            @result{} #t
+(list-of-nulls? '(()))          @result{} #t
+(list-of-nulls? '(() ()))       @result{} #t
+(list-of-nulls? '(() () ()))    @result{} #t
+
+(list-of-nulls? '((1)))         @result{} #f
+(list-of-nulls? '((1) (2)))     @result{} #f
+(list-of-nulls? '((1) (2) (3))) @result{} #f
+
+(list-of-nulls? '(1 (2) (3)))   @result{} #f
+(list-of-nulls? '((1) 2 (3)))   @result{} #f
+(list-of-nulls? '((1) (2) 3))   @result{} #f
+
+(list-of-nulls? '#())           @result{} #f
+@end lisp
+@end defun
+
+
+@defun list-of-pairs? @var{obj}
+Return @true{} if @var{obj} is a (possibly empty) list of pair objects; otherwise return @false{}.
+Notice that this function returns @false{} if @var{obj} is neither null nor a proper list of pairs.
+
+@lisp
+(list-of-pairs? '())            @result{} #t
+(list-of-pairs? '((1)))         @result{} #t
+(list-of-pairs? '((1) (2)))     @result{} #t
+(list-of-pairs? '((1) (2) (3))) @result{} #t
+
+(list-of-pairs? '(()))          @result{} #f
+(list-of-pairs? '(() ()))       @result{} #f
+(list-of-pairs? '(() () ()))    @result{} #f
+
+(list-of-pairs? '(1 (2) (3)))   @result{} #f
+(list-of-pairs? '((1) 2 (3)))   @result{} #f
+(list-of-pairs? '((1) (2) 3))   @result{} #f
+
+(list-of-pairs? '#())           @result{} #f
+@end lisp
+@end defun
+
+
+@defun lists-of-lists-of-equal-length? @var{obj}
+Return @true{} if @var{obj} is a (possibly empty) list of (possibly empty) lists of equal length;
+otherwise return @false{}.  Notice that this function returns @false{} if @var{obj} is neither null
+nor a proper list of pairs.
+
+@lisp
+(lists-of-lists-of-equal-length? '())                   @result{} #t
+(lists-of-lists-of-equal-length? '(()))                 @result{} #t
+(lists-of-lists-of-equal-length? '(() ()))              @result{} #t
+(lists-of-lists-of-equal-length? '(() () ()))           @result{} #t
+(lists-of-lists-of-equal-length? '((1)))                @result{} #t
+(lists-of-lists-of-equal-length? '((1) (2)))            @result{} #t
+(lists-of-lists-of-equal-length? '((1) (2) (3)))        @result{} #t
+
+(lists-of-lists-of-equal-length? '(() (2) (3)))         @result{} #f
+(lists-of-lists-of-equal-length? '((1) () (3)))         @result{} #f
+(lists-of-lists-of-equal-length? '((1) (2) ()))         @result{} #f
+(lists-of-lists-of-equal-length? '((1 0) (2) (3)))      @result{} #f
+(lists-of-lists-of-equal-length? '((1) (2 0) (3)))      @result{} #f
+(lists-of-lists-of-equal-length? '((1) (2) (3 0)))      @result{} #f
+
+(lists-of-lists-of-equal-length? '((1 2 3 4 5)))        @result{} #t
+(lists-of-lists-of-equal-length? '((1 2 3 4 5)
+                                   (6 7 8 9 0)))        @result{} #t
+(lists-of-lists-of-equal-length? '((1 2 3 4 5)
+                                   (6 7 8 9 0)
+                                   (9 8 7 6 5)))        @result{} #t
+
+(lists-of-lists-of-equal-length? 123)                   @result{} #f
+@end lisp
+@end defun
+
+
+@defun lists-of-equal-length? @varo{obj} @var{obj} @dots{}
+Return @true{} if all the arguments are (possibly empty) lists of equal length; otherwise return
+@false{}.  Notice that this function returns @false{} if one of the arguments is neither null nor a
+proper list of pairs.
+
+@lisp
+(lists-of-equal-length? '())                    @result{} #t
+(lists-of-equal-length? '() '())                @result{} #t
+(lists-of-equal-length? '() '() '())            @result{} #t
+(lists-of-equal-length? '(1))                   @result{} #t
+(lists-of-equal-length? '(1) '(2))              @result{} #t
+(lists-of-equal-length? '(1) '(2) '(3))         @result{} #t
+
+(lists-of-equal-length? '() '(2) '(3))          @result{} #f
+(lists-of-equal-length? '(1) '() '(3))          @result{} #f
+(lists-of-equal-length? '(1) '(2) '())          @result{} #f
+(lists-of-equal-length? '(1 0) '(2) '(3))       @result{} #f
+(lists-of-equal-length? '(1) '(2 0) '(3))       @result{} #f
+(lists-of-equal-length? '(1) '(2) '(3 0))       @result{} #f
+
+(lists-of-equal-length? '(1 2 3 4 5))           @result{} #t
+(lists-of-equal-length? '(1 2 3 4 5)
+                        '(6 7 8 9 0))           @result{} #t
+(lists-of-equal-length? '(1 2 3 4 5)
+                        '(6 7 8 9 0)
+                        '(9 8 7 6 5))           @result{} #t
+
+(lists-of-equal-length? 123)                    @result{} #f
+@end lisp
+@end defun
 
 @c page
 @node lists getters
