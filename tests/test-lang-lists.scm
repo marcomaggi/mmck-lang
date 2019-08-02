@@ -75,6 +75,14 @@
     (check (cons* 1 2 3 '(4))	=> '(1 2 3 4))
     #| end of BEGIN |# )
 
+;;; --------------------------------------------------------------------
+
+  (check (make-list 0)		=> '())
+  (check (make-list 0 'a)	=> '())
+
+  (check (make-list 3)		=> (list (void) (void) (void)))
+  (check (make-list 3 'a)	=> '(a a a))
+
   (values))
 
 
@@ -88,11 +96,12 @@
     (check-for-true (list-of-lists? '((1))))
     (check-for-true (list-of-lists? '((1) (2))))
     (check-for-true (list-of-lists? '((1) (2) (3))))
-
-    (check-for-false (list-of-lists? '#()))
+    ;;
     (check-for-false (list-of-lists? '(1 (2) (3))))
     (check-for-false (list-of-lists? '((1) 2 (3))))
     (check-for-false (list-of-lists? '((1) (2) 3)))
+    ;;
+    (check-for-false (list-of-lists? '#()))
     #| end of BEGIN |# )
 
 ;;; --------------------------------------------------------------------
@@ -105,11 +114,12 @@
     (check-for-true  (list-of-pairs? '((1))))
     (check-for-true  (list-of-pairs? '((1) (2))))
     (check-for-true  (list-of-pairs? '((1) (2) (3))))
-
-    (check-for-false (list-of-pairs? '#()))
+    ;;
     (check-for-false (list-of-pairs? '(1 (2) (3))))
     (check-for-false (list-of-pairs? '((1) 2 (3))))
     (check-for-false (list-of-pairs? '((1) (2) 3)))
+    ;;
+    (check-for-false (list-of-pairs? '#()))
     #| end of BEGIN |# )
 
 ;;; --------------------------------------------------------------------
@@ -122,11 +132,12 @@
     (check-for-false (list-of-nulls? '((1))))
     (check-for-false (list-of-nulls? '((1) (2))))
     (check-for-false (list-of-nulls? '((1) (2) (3))))
-
-    (check-for-false (list-of-nulls? '#()))
+    ;;
     (check-for-false (list-of-nulls? '(1 (2) (3))))
     (check-for-false (list-of-nulls? '((1) 2 (3))))
     (check-for-false (list-of-nulls? '((1) (2) 3)))
+    ;;
+    (check-for-false (list-of-nulls? '#()))
     #| end of BEGIN |# )
 
 ;;; --------------------------------------------------------------------
@@ -139,20 +150,22 @@
     (check-for-true (lists-of-lists-of-equal-length? '((1))))
     (check-for-true (lists-of-lists-of-equal-length? '((1) (2))))
     (check-for-true (lists-of-lists-of-equal-length? '((1) (2) (3))))
-
+    ;;
     (check-for-false (lists-of-lists-of-equal-length? '(() (2) (3))))
     (check-for-false (lists-of-lists-of-equal-length? '((1) () (3))))
     (check-for-false (lists-of-lists-of-equal-length? '((1) (2) ())))
     (check-for-false (lists-of-lists-of-equal-length? '((1 0) (2) (3))))
     (check-for-false (lists-of-lists-of-equal-length? '((1) (2 0) (3))))
     (check-for-false (lists-of-lists-of-equal-length? '((1) (2) (3 0))))
-
+    ;;
     (check-for-true (lists-of-lists-of-equal-length? '((1 2 3 4 5))))
     (check-for-true (lists-of-lists-of-equal-length? '((1 2 3 4 5)
 						       (6 7 8 9 0))))
     (check-for-true (lists-of-lists-of-equal-length? '((1 2 3 4 5)
 						       (6 7 8 9 0)
 						       (9 8 7 6 5))))
+    ;;
+    (check-for-false (lists-of-lists-of-equal-length? 123))
     #| end of BEGIN |# )
 
 ;;; --------------------------------------------------------------------
@@ -164,14 +177,14 @@
     (check-for-true (lists-of-equal-length? '(1)))
     (check-for-true (lists-of-equal-length? '(1) '(2)))
     (check-for-true (lists-of-equal-length? '(1) '(2) '(3)))
-
+    ;;
     (check-for-false (lists-of-equal-length? '() '(2) '(3)))
     (check-for-false (lists-of-equal-length? '(1) '() '(3)))
     (check-for-false (lists-of-equal-length? '(1) '(2) '()))
     (check-for-false (lists-of-equal-length? '(1 0) '(2) '(3)))
     (check-for-false (lists-of-equal-length? '(1) '(2 0) '(3)))
     (check-for-false (lists-of-equal-length? '(1) '(2) '(3 0)))
-
+    ;;
     (check-for-true (lists-of-equal-length? '(1 2 3 4 5)))
     (check-for-true (lists-of-equal-length? '(1 2 3 4 5)
 					    '(6 7 8 9 0)))
@@ -213,6 +226,8 @@
 					     '(9 8 7 6 5)
 					     '(#\1 #\2 #\3 #\4 #\5)
 					     '(#\6 #\7 #\8 #\9)))
+    ;;
+    (check-for-false (lists-of-equal-length? 123))
     #| end of BEGIN |# )
 
   (values))

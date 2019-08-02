@@ -295,11 +295,8 @@
 ;;;; predicates
 
 (define (list-of-lists? objs)
-  ;;Return  true if  OBJS  is a  (possibly  empty) list  of  (possibly empty)  lists;
-  ;;otherwise return false.
-  ;;
-  ;;Notice that this  function returns null if OBJS  is not null or a  proper list of
-  ;;pairs.
+  ;;Return true  if OBJS  is a  (possibly empty) list  of (possibly  empty) lists;  otherwise return
+  ;;false.  Notice that this function returns false if OBJS is not null or a proper list of pairs.
   ;;
   (or (null? objs)
       (and (pair? objs)
@@ -307,11 +304,8 @@
 	   (list-of-lists? (cdr objs)))))
 
 (define (list-of-nulls? objs)
-  ;;Return true if OBJS is a (possibly  empty) list of null objects; otherwise return
-  ;;false.
-  ;;
-  ;;Notice that this  function returns null if OBJS  is not null or a  proper list of
-  ;;nulls.
+  ;;Return true if OBJS is a (possibly empty)  list of null objects; otherwise return false.  Notice
+  ;;that this function returns false if OBJS is not null or a proper list of nulls.
   ;;
   (or (null? objs)
       (and (pair? objs)
@@ -319,11 +313,8 @@
 	   (list-of-nulls? (cdr objs)))))
 
 (define (list-of-pairs? objs)
-  ;;Return true if OBJS is a (possibly  empty) list of pair objects; otherwise return
-  ;;false.
-  ;;
-  ;;Notice that this  function returns null if OBJS  is not null or a  proper list of
-  ;;pairs.
+  ;;Return true if OBJS is a (possibly empty)  list of pair objects; otherwise return false.  Notice
+  ;;that this function returns false if OBJS is not null or a proper list of pairs.
   ;;
   (or (null? objs)
       (and (pair? objs)
@@ -332,8 +323,7 @@
 
 (define (lists-of-lists-of-equal-length? ell*)
   ;;Return true if ELL* is a list of (possibly empty) lists of equal length; otherwise return false.
-  ;;
-  ;;Notice that this function returns null if ELL* is not null or a proper list of pairs.
+  ;;Notice that this function returns false if ELL* is not null or a proper list of pairs.
   ;;
   (or (null? ell*)
       (and (pair? ell*)
@@ -348,13 +338,11 @@
 
 (case-define lists-of-equal-length?
   ;;Return true if  all the arguments are  (possibly empty) lists of equal  length; otherwise return
-  ;;false.
-  ;;
-  ;;Notice that this function returns  null if one of the arguments is not null  or a proper list of
-  ;;pairs.
+  ;;false.  Notice that this function returns false if one  of the arguments is not null or a proper
+  ;;list of pairs.
   ;;
   ((ell1)
-   #t)
+   (list? ell1))
 
   ((ell1 ell2)
    (let loop ((ell1 ell1)
