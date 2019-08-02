@@ -841,6 +841,7 @@ behaviour is undefined.
 @end itemize
 
 @menu
+* lists unsafe::                Basic unsafe list operations.
 * lists cons::                  List constructors.
 * lists pred::                  List predicates.
 * lists getters::               Special list getters.
@@ -848,6 +849,46 @@ behaviour is undefined.
 * lists map::                   Mapping lists.
 * lists search::                Searching lists.
 @end menu
+
+@c page
+@node lists unsafe
+@section Basic unsafe list operations
+
+
+@deffn {Unsafe Operation} $car @var{pair}
+Like @func{car} but the operation is integrated at the call site and it does not check its
+arguments.
+@end deffn
+
+
+@deffn {Unsafe Operation} $cdr @var{pair}
+Like @func{cdr} but the operation is integrated at the call site and it does not check its
+arguments.
+@end deffn
+
+
+@deffn {Unsafe Operation} $set-car! @var{pair} @var{new-value}
+Like @func{set-car!} but the operation is integrated at the call site and it does not check its
+arguments.
+@end deffn
+
+
+@deffn {Unsafe Operation} $set-cdr! @var{pair} @var{new-value}
+Like @func{set-cdr!} but the operation is integrated at the call site and it does not check its
+arguments.
+@end deffn
+
+
+@deffn {Unsafe Operation} $set-car-immediate! @var{pair} @var{new-value}
+Like @func{set-car!} but the operation is integrated at the call site, it does not check its
+arguments, and @var{new-value} must be an immediate value.
+@end deffn
+
+
+@deffn {Unsafe Operation} $set-cdr-immediate! @var{pair} @var{new-value}
+Like @func{set-cdr!} but the operation is integrated at the call site, it does not check its
+arguments, and @var{new-value} must be an immediate value.
+@end deffn
 
 @c page
 @node lists cons

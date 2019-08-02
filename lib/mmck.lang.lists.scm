@@ -36,10 +36,10 @@
      ;; unsafe operations
      $car
      $cdr
-     $car-set!
-     $cdr-set!
-     $car-set-immediate!
-     $cdr-set-immediate!
+     $set-car!
+     $set-cdr!
+     $set-car-immediate!
+     $set-cdr-immediate!
 
      ;; constructors
      cons*
@@ -279,16 +279,16 @@
 (define-syntax-rule ($cdr ?pair)
   (##sys#slot ?pair 1))
 
-(define-syntax-rule ($car-set! ?pair ?new-value)
+(define-syntax-rule ($set-car! ?pair ?new-value)
   (##sys#setslot ?pair 0 ?new-value))
 
-(define-syntax-rule ($cdr-set! ?pair ?new-value)
+(define-syntax-rule ($set-cdr! ?pair ?new-value)
   (##sys#setslot ?pair 1 ?new-value))
 
-(define-syntax-rule ($car-set-immediate! ?pair ?new-value)
+(define-syntax-rule ($set-car-immediate! ?pair ?new-value)
   (##sys#setislot ?pair 0 ?new-value))
 
-(define-syntax-rule ($cdr-set-immediate! ?pair ?new-value)
+(define-syntax-rule ($set-cdr-immediate! ?pair ?new-value)
   (##sys#setislot ?pair 1 ?new-value))
 
 
@@ -501,7 +501,7 @@
 		       (let ((next (cdr ell)))
 			 (if (pair? next)
 			     (let ((P (cons (car ell) '())))
-			       ($cdr-set! last-pair P)
+			       ($set-cdr! last-pair P)
 			       (loop next P))
 			   (values head-items (car ell))))
 		     (values head-items (void)))))

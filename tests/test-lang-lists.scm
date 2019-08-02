@@ -64,6 +64,33 @@
   (cons b a))
 
 
+(parameterise ((check-test-name	'unsafe))
+
+  (check
+      (let ((P (cons 'a 'b)))
+	(values ($car P)
+		($cdr P)))
+    => 'a 'b)
+
+  (check
+      (let ((P (cons 'a 'b)))
+	($set-car! P 'x)
+	($set-cdr! P 'y)
+	(values ($car P)
+		($cdr P)))
+    => 'x 'y)
+
+  (check
+      (let ((P (cons 'a 'b)))
+	($set-car-immediate! P 88)
+	($set-cdr-immediate! P 99)
+	(values ($car P)
+		($cdr P)))
+    => 88 99)
+
+  (values))
+
+
 (parameterise ((check-test-name	'constructors))
 
   (begin
