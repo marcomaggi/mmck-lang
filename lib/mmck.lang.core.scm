@@ -61,6 +61,7 @@
      (syntax: alist-var-cons! cons)
      (syntax: receive-and-return apply values call-with-values)
      (syntax: begin0)
+     (syntax: begin-checks)
      (syntax: named-lambda)
      (syntax: internal-body)
      (syntax: define-auxiliary-syntaxes)
@@ -230,6 +231,11 @@
 	 ?form0
        (begin ?form1 ?form ...)))
     ))
+
+(define-syntax begin-checks
+  (syntax-rules ()
+    ((_ ?expr0 ?expr ...)
+     (##core#check (begin ?expr0 ?expr ...)))))
 
 (define-syntax named-lambda
   (ir-macro-transformer

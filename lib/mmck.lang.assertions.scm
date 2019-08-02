@@ -31,15 +31,26 @@
 	 (emit-import-library mmck.lang.assertions))
 
 (module (mmck.lang.assertions)
-    (assert-argument-type
+    ((syntax: assert* assertion-violation)
+     assert-argument-type
+     assert-argument-type/rest
      assert-argument-list-of-type
      assert-argument-vector-of-type)
   (import (scheme)
 	  (only (chicken base)
 		unless)
+	  (only (chicken format)
+		format)
 	  (mmck lang debug)
 	  (mmck lang core)
 	  (mmck exceptional-conditions))
+    (import-for-syntax (scheme)
+		     (only (chicken syntax)
+			   #;ir-macro-transformer
+			   er-macro-transformer
+			   syntax-error)
+		     (only (matchable)
+			   match))
 
 
 ;;;; helpers
@@ -50,13 +61,50 @@
     nil))
 
 
+;;;; assertions
+
+(define-syntax assert*
+  (er-macro-transformer
+    (lambda (input-form.stx rename compare)
+      (match input-form.stx
+	((_ ?expr)
+	 (let ((%unless			(rename 'unless))
+	       (%quote			(rename 'quote))
+	       (%assertion-violation	(rename 'unless))
+	       (%__who__		(rename '__who__)))
+	   `(,%unless ,?expr (,%assertion-violation (__who__) "failed assertion" (,%quote ,?expr)))))
+	(_
+	 (syntax-error 'assert* "syntax error in macro use" input-form.stx))))))
+
+
 ;;;; predicates
 
 (define (assert-argument-type who type.str type-pred arg arg.idx)
+  ;;Usage example:
+  ;;
+  ;;  (define* (fold-left combine ell)
+  ;;    (assert-argument-type (__who__) "procedure" procedure? combine 1)
+  ;;    (assert-argument-type (__who__) "list"      list?      ell     2)
+  ;;    ---)
+  ;;
   (unless (type-pred arg)
     (assertion-violation who
-      (string-append "expected argument " (number->string arg.idx) " of type \"" type.str "\"")
+      (format #f "expected argument ~a of type \"~a\"" arg.idx type.str)
       arg)))
+
+(define (assert-argument-type/rest who type.str type-pred rest-arg)
+  ;;Usage example:
+  ;;
+  ;;  (define* (fold-left combine ell . ell*)
+  ;;    (assert-argument-type (__who__) "procedure" procedure? combine 1)
+  ;;    (assert-argument-type (__who__) "list"      list?      ell     2)
+  ;;    (assert-argument-type/rest (__who__) "list of lists" list-of-lists? ell*)
+  ;;    ---)
+  ;;
+  (unless (type-pred rest-arg)
+    (assertion-violation who
+      (format #f "expected rest argument of type \"~a\"" type.str)
+      rest-arg)))
 
 (define (assert-argument-list-of-type who type.str type-pred arg* arg.idx)
   (fold-left (lambda (item.idx item)

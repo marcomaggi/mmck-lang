@@ -68,6 +68,10 @@
 @ref{\NODE\,\TITLE\,\TITLE\,chicken-core}
 @end macro
 
+@macro ChickenInternalsRef{NODE, TITLE}
+@ref{\NODE\,\TITLE\,\TITLE\,chicken-internals}
+@end macro
+
 @macro MMCKExceptionalConditionsRef{NODE, TITLE}
 @ref{\NODE\,\TITLE\,\TITLE\,mmck-exceptional-conditions}
 @end macro
@@ -783,6 +787,13 @@ values returned by @qvar{expr}.
 @end deffn
 
 
+@deffn Syntax begin-checks @qvaro{expr} @qvar{expr} @dots{}
+Like @syntax{begin}, but wrap the whole form into the @chicken{} low--level operation
+@syntax{##core#check}, so that: if unsafe compilation is enabled, the whole form expands to
+no--operations.  @ChickenInternalsRef{checks unsafe, Including/excluding checks}.
+@end deffn
+
+
 @deffn Syntax xor @qvar{expr} @dots{}
 Exclusive OR.
 @end deffn
@@ -819,6 +830,14 @@ Predicates for the boolean objects @true{} and @false{}.
 @node lists
 @chapter List functions
 
+
+@menu
+* lists cons::                  List constructors.
+@end menu
+
+@c page
+@node lists cons
+@section List constructors
 
 
 
