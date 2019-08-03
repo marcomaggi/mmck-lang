@@ -569,36 +569,36 @@
   ;;more lists
   ;;
   (check
-      ($fold-left/any
+      ($fold-left/list
 	  (lambda (knil item1 item2 item3 item4)
 	    (+ knil item1 item2 item3 item4))
 	0
-	'(1 2 3 4)
-	'(5 6 7 8)
-	'(9 1 2 3)
-	'((4 5 6 7)))
+	'((1 2 3 4)
+	  (5 6 7 8)
+	  (9 1 2 3)
+	  (4 5 6 7)))
     => (+ 1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7))
 
   (check
-      ($fold-left/any
+      ($fold-left/list
 	  (lambda (knil item1 item2 item3 item4)
 	    (list knil item1 item2 item3 item4))
 	0
-	'(1 2 3 4)
-	'(5 6 7 8)
-	'(9 1 2 3)
-	'((4 5 6 7)))
+	'((1 2 3 4)
+	  (5 6 7 8)
+	  (9 1 2 3)
+	  (4 5 6 7)))
     => '((((0 1 5 9 4) 2 6 1 5) 3 7 2 6) 4 8 3 7))
 
   (check
-      ($fold-left/any
+      ($fold-left/list
 	  (lambda (knil item1 item2 item3 item4 item5)
 	    (cons knil (list item1 item2 item3 item4 item5)))
 	'(0)
-	'(1 2 3 4)
-	'(5 6 7 8)
-	'(9 1 2 3)
-	'((4 5 6 7)
+	'((1 2 3 4)
+	  (5 6 7 8)
+	  (9 1 2 3)
+	  (4 5 6 7)
 	  (a b c d)))
     => '(((((0) 1 5 9 4 a) 2 6 1 5 b) 3 7 2 6 c) 4 8 3 7 d))
 
@@ -789,25 +789,25 @@
   ;;more lists
   ;;
   (check
-      ($fold-right/any
+      ($fold-right/list
 	  (lambda (item1 item2 item3 item4 knil)
 	    (+ knil item1 item2 item3 item4))
 	0
-	'(1 2 3 4)
-	'(5 6 7 8)
-	'(9 1 2 3)
-	'((4 5 6 7)))
+	'((1 2 3 4)
+	  (5 6 7 8)
+	  (9 1 2 3)
+	  (4 5 6 7)))
     => (+ 1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7))
 
   (check
-      ($fold-right/any
+      ($fold-right/list
 	  (lambda (item1 item2 item3 item4 item5 knil)
 	    (cons (list item1 item2 item3 item4 item5) knil))
 	0
-	'(1 2 3 4)
-	'(5 6 7 8)
-	'(9 1 2 3)
-	'((4 5 6 7)
+	'((1 2 3 4)
+	  (5 6 7 8)
+	  (9 1 2 3)
+	  (4 5 6 7)
 	  (a b c d)))
     => '((1 5 9 4 a) (2 6 1 5 b) (3 7 2 6 c) (4 8 3 7 d) . 0))
 

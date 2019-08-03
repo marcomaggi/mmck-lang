@@ -63,42 +63,42 @@
      $fold-left/1
      $fold-left/2
      $fold-left/3
-     $fold-left/any
+     $fold-left/list
      ;;
      $fold-right/1
      $fold-right/2
      $fold-right/3
-     $fold-right/any
+     $fold-right/list
      ;;
      $map/1
      $map/2
      $map/3
-     $map/any
+     $map/list
      ;;
      $for-each/1
      $for-each/2
      $for-each/3
-     $for-each/any
+     $for-each/list
      ;;
      $for-each-in-order/1
      $for-each-in-order/2
      $for-each-in-order/3
-     $for-each-in-order/any
+     $for-each-in-order/list
      ;;
      $map-in-order/1
      $map-in-order/2
      $map-in-order/3
-     $map-in-order/any
+     $map-in-order/list
      ;;
      $for-all/1
      $for-all/2
      $for-all/3
-     $for-all/any
+     $for-all/list
      ;;
      $exists/1
      $exists/2
      $exists/3
-     $exists/any
+     $exists/list
      ;;
      $find
 
@@ -129,7 +129,7 @@
 
 (define-syntax define-list-folder
   (syntax-rules ()
-    ((_ ?who ?list-folder/1 ?list-folder/2 ?list-folder/3 ?list-folder/any)
+    ((_ ?who ?list-folder/1 ?list-folder/2 ?list-folder/3 ?list-folder/list)
      (case-define ?who
        ((combine nil ell)
 	(begin-checks
@@ -162,12 +162,12 @@
 	  (assert-argument-type (quote ?who) "list"      list?      ell3    4)
 	  (assert-argument-type/rest (quote ?who) "list of lists" list-of-lists? ell*)
 	  (assert-lists-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
-	(?list-folder/any combine nil ell1 ell2 ell3 ell*))))
+	(?list-folder/list combine nil (cons* ell1 ell2 ell3 ell*)))))
     ))
 
 (define-syntax define-list-mapper
   (syntax-rules ()
-    ((_ ?who ?list-mapper/1 ?list-mapper/2 ?list-mapper/3 ?list-mapper/any)
+    ((_ ?who ?list-mapper/1 ?list-mapper/2 ?list-mapper/3 ?list-mapper/list)
      (case-define ?who
        ((func ell)
 	(begin-checks
@@ -200,12 +200,12 @@
 	  (assert-argument-type (quote ?who) "list"      list?      ell3 4)
 	  (assert-argument-type/rest (quote ?who) "list of lists" list-of-lists? ell*)
 	  (assert-lists-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
-	(?list-mapper/any func ell1 ell2 ell3 ell*))))
+	(?list-mapper/list func (cons* ell1 ell2 ell3 ell*)))))
     ))
 
 (define-syntax define-list-searcher
   (syntax-rules ()
-    ((_ ?who ?list-searcher/1 ?list-searcher/2 ?list-searcher/3 ?list-searcher/any)
+    ((_ ?who ?list-searcher/1 ?list-searcher/2 ?list-searcher/3 ?list-searcher/list)
      (case-define ?who
        ((pred ell)
 	(begin-checks
@@ -238,7 +238,7 @@
 	  (assert-argument-type (quote ?who) "list"      list?      ell3 4)
 	  (assert-argument-type/rest (quote ?who) "list of lists" list-of-lists? ell*)
 	  (assert-lists-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
-	(?list-searcher/any pred ell1 ell2 ell3 ell*))))
+	(?list-searcher/list pred (cons* ell1 ell2 ell3 ell*)))))
     ))
 
 
@@ -512,79 +512,82 @@
 
 ;;;; folding functions
 
-(define ($fold-left/1 combine nil ell)
+(define ($fold-left/1 combine knil ell)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
   (if (pair? ell)
-      ($fold-left/1 combine (combine nil (car ell)) (cdr ell))
-    nil))
+      ($fold-left/1 combine (combine knil (car ell)) (cdr ell))
+    knil))
 
-(define ($fold-left/2 combine nil ell1 ell2)
+(define ($fold-left/2 combine knil ell1 ell2)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
   (if (pair? ell1)
-      ($fold-left/2 combine (combine nil (car ell1) (car ell2)) (cdr ell1) (cdr ell2))
-    nil))
+      ($fold-left/2 combine (combine knil (car ell1) (car ell2)) (cdr ell1) (cdr ell2))
+    knil))
 
-(define ($fold-left/3 combine nil ell1 ell2 ell3)
+(define ($fold-left/3 combine knil ell1 ell2 ell3)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
   (if (pair? ell1)
       ($fold-left/3 combine
-			 (combine nil (car ell1) (car ell2) (car ell3))
-			 (cdr ell1) (cdr ell2) (cdr ell3))
-    nil))
+	(combine knil (car ell1) (car ell2) (car ell3))
+	(cdr ell1) (cdr ell2) (cdr ell3))
+    knil))
 
-(define ($fold-left/any combine nil ell1 ell2 ell3 ell*)
+(define ($fold-left/list combine knil ell*)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
-  (if (pair? ell1)
-      ($fold-left/any combine
-			   (apply combine nil (car ell1) (car ell2) (car ell3) ($map/1 car ell*))
-			   (cdr ell1) (cdr ell2) (cdr ell3) ($map/1 cdr ell*))
-    nil))
+  (if (or (null? ell*)
+	  (null? (car ell*)))
+      knil
+    (receive (car* cdr*)
+	(cars-and-cdrs ell*)
+      ($fold-left/list combine
+	(apply combine knil car*)
+	cdr*))))
 
 ;;; --------------------------------------------------------------------
 
-(define ($fold-right/1 combine nil ell)
+(define ($fold-right/1 combine knil ell)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
-  (let loop ((nil	nil)
+  (let loop ((knil	knil)
 	     (rev-ell	(reverse ell)))
     (if (pair? rev-ell)
-	(loop (combine (car rev-ell) nil)
+	(loop (combine (car rev-ell) knil)
 	      (cdr rev-ell))
-      nil)))
+      knil)))
 
-(define ($fold-right/2 combine nil ell1 ell2)
+(define ($fold-right/2 combine knil ell1 ell2)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
-  (let loop ((nil	nil)
+  (let loop ((knil	knil)
 	     (cars*	(gather-cars-in-reverse (list ell1 ell2))))
     (if (pair? cars*)
-	(loop (apply combine (append (car cars*) (list nil)))
+	(loop (apply combine (append (car cars*) (list knil)))
 	      (cdr cars*))
-      nil)))
+      knil)))
 
-(define ($fold-right/3 combine nil ell1 ell2 ell3)
+(define ($fold-right/3 combine knil ell1 ell2 ell3)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
-  (let loop ((nil	nil)
+  (let loop ((knil	knil)
 	     (cars*	(gather-cars-in-reverse (list ell1 ell2 ell3))))
     (if (pair? cars*)
-	(loop (apply combine (append (car cars*) (list nil)))
+	(loop (apply combine (append (car cars*) (list knil)))
 	      (cdr cars*))
-      nil)))
+      knil)))
 
-(define ($fold-right/any combine nil ell1 ell2 ell3 ell*)
+(define ($fold-right/list combine knil ell*)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
-  (let loop ((nil	nil)
-	     (cars*	(gather-cars-in-reverse (cons* ell1 ell2 ell3 ell*))))
+  (let loop ((knil	knil)
+	     (cars*	(gather-cars-in-reverse ell*)))
     (if (pair? cars*)
-	(loop (apply combine (append (car cars*) (list nil)))
+	(loop (apply combine (append (car cars*) (list knil)))
 	      (cdr cars*))
-      nil)))
+      knil)))
 
 ;;; --------------------------------------------------------------------
 
@@ -592,72 +595,72 @@
   $fold-left/1
   $fold-left/2
   $fold-left/3
-  $fold-left/any)
+  $fold-left/list)
 
 (define-list-folder fold-right
   $fold-right/1
   $fold-right/2
   $fold-right/3
-  $fold-right/any)
+  $fold-right/list)
 
 
 ;;;; mapping functions
 
 (define ($map/1 func ell)
   ($fold-right/1 (lambda (item nil)
-			(cons (func item) nil))
-		      '() ell))
+		   (cons (func item) nil))
+    '() ell))
 
 (define ($map/2 func ell1 ell2)
   ($fold-right/2 (lambda (item1 item2 nil)
-			(cons (func item1 item2) nil))
-		      '() ell1 ell2))
+		   (cons (func item1 item2) nil))
+    '() ell1 ell2))
 
 (define ($map/3 func ell1 ell2 ell3)
   ($fold-right/3 (lambda (item1 item2 item3 nil)
-			(cons (func item1 item2 item3) nil))
-		      '() ell1 ell2 ell3))
+		   (cons (func item1 item2 item3) nil))
+    '() ell1 ell2 ell3))
 
-(define ($map/any func ell1 ell2 ell3 ell*)
-  ($fold-right/any (lambda (item1 item2 item3 . rest)
-			  (receive (item* nil)
-			      (butlast-and-last rest)
-			    (cons (apply func item1 item2 item3 item*)
-				  nil)))
-			'() ell1 ell2 ell3 ell*))
+(define ($map/list func ell*)
+  ($fold-right/list (lambda args
+		      (receive (item* nil)
+			  (butlast-and-last args)
+			(cons (apply func item*)
+			      nil)))
+    '() ell*))
 
 ;;; --------------------------------------------------------------------
 
 (define ($for-each/1 func ell)
-  ($fold-left/1 (lambda (nil item)
-		       (func item)
-		       nil)
-		     (void) ell))
+  ($fold-left/1 (lambda (knil item)
+		  (func item)
+		  knil)
+    (void) ell))
 
 (define ($for-each/2 func ell1 ell2)
-  ($fold-left/2 (lambda (nil item1 item2)
-		       (func item1 item2)
-		       nil)
-		     (void) ell1 ell2))
+  ($fold-left/2 (lambda (knil item1 item2)
+		  (func item1 item2)
+		  knil)
+    (void) ell1 ell2))
 
 (define ($for-each/3 func ell1 ell2 ell3)
-  ($fold-left/3 (lambda (nil item1 item2 item3)
-		       (func item1 item2 item3)
-		       nil)
-		     (void) ell1 ell2 ell3))
+  ($fold-left/3 (lambda (knil item1 item2 item3)
+		  (func item1 item2 item3)
+		  knil)
+    (void) ell1 ell2 ell3))
 
-(define ($for-each/any func ell1 ell2 ell3 ell*)
-  ($fold-left/any (lambda (nil item1 item2 item3 . item*)
-			 (apply func item1 item2 item3 item*)
-			 nil)
-		       (void) ell1 ell2 ell3 ell*))
+(define ($for-each/list func ell*)
+  ($fold-left/list (lambda (knil . item*)
+		     (apply func item*)
+		     knil)
+    (void) ell*))
 
 ;;; --------------------------------------------------------------------
 
 (define $for-each-in-order/1	$for-each/1)
 (define $for-each-in-order/2	$for-each/2)
 (define $for-each-in-order/3	$for-each/3)
-(define $for-each-in-order/any	$for-each/any)
+(define $for-each-in-order/list	$for-each/list)
 
 ;;; --------------------------------------------------------------------
 
@@ -670,8 +673,8 @@
 (define ($map-in-order/3 func ell1 ell2 ell3)
   (reverse ($fold-left/3 func '() ell1 ell2 ell3)))
 
-(define ($map-in-order/any func ell1 ell2 ell3 ell*)
-  (reverse ($fold-left/any func '() ell1 ell2 ell3 ell*)))
+(define ($map-in-order/list func ell*)
+  (reverse ($fold-left/list func '() ell*)))
 
 ;;; --------------------------------------------------------------------
 
@@ -679,21 +682,20 @@
   $map-in-order/1
   $map-in-order/2
   $map-in-order/3
-  $map-in-order/any)
+  $map-in-order/list)
 
 (define-list-mapper for-each-in-order
   $for-each-in-order/1
   $for-each-in-order/2
   $for-each-in-order/3
-  $for-each-in-order/any)
+  $for-each-in-order/list)
 
 
 ;;;; search functions
 
 (define ($for-all/1 pred ell)
   (or (null? ell)
-      (and (pair? ell)
-	   (pred (car ell))
+      (and (pred (car ell))
 	   ($for-all/1 pred (cdr ell)))))
 
 (define ($for-all/2 pred ell1 ell2)
@@ -708,13 +710,13 @@
 	   (pred (car ell1) (car ell2) (car ell3))
 	   ($for-all/3 pred (cdr ell1) (cdr ell2) (cdr ell3)))))
 
-(define ($for-all/any pred ell1 ell2 ell3 ell*)
-  (or (null? ell1)
-      (and (pair? ell1)
-	   (receive (car* cdr*)
-	       (cars-and-cdrs ell*)
-	     (and (apply pred (car ell1) (car ell2) (car ell3) car*)
-		  ($for-all/any  pred (cdr ell1) (cdr ell2) (cdr ell3) cdr*))))))
+(define ($for-all/list pred ell*)
+  (or (null? ell*)
+      (null? (car ell*))
+      (receive (car* cdr*)
+	  (cars-and-cdrs ell*)
+	(and (apply pred car*)
+	     ($for-all/list pred cdr*)))))
 
 ;;; --------------------------------------------------------------------
 
@@ -736,13 +738,13 @@
 	   (or (pred (car ell1) (car ell2) (car ell3))
 	       ($exists/3 pred (cdr ell1) (cdr ell2) (cdr ell3))))))
 
-(define ($exists/any pred ell1 ell2 ell3 ell*)
-  (or (null? ell1)
-      (and (pair? ell1)
-	   (receive (car* cdr*)
-	       (cars-and-cdrs ell*)
-	     (or (apply pred (car ell1) (car ell2) (car ell3) car*)
-		 ($exists/any pred (cdr ell1) (cdr ell2) (cdr ell3) cdr*))))))
+(define ($exists/list pred ell*)
+  (or (null? ell*)
+      (null? (car ell*))
+      (receive (car* cdr*)
+	  (cars-and-cdrs ell*)
+	(or (apply pred car*)
+	    ($for-all/list pred cdr*)))))
 
 ;;; --------------------------------------------------------------------
 
@@ -765,13 +767,13 @@
   $for-all/1
   $for-all/2
   $for-all/3
-  $for-all/any)
+  $for-all/list)
 
 (define-list-searcher exists
   $exists/1
   $exists/2
   $exists/3
-  $exists/any)
+  $exists/list)
 
 
 ;;;; done
