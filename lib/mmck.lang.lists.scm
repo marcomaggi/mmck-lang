@@ -436,8 +436,8 @@
    ;;The argument ELL* must be a list of non-empty  lists.  Return two values: a list of the CARs of
    ;;the lists in ELL*; a list of the CDRs of the lists in ELL*.
    ;;
-   ;;The optional argument CAR*-TAIL  must be a list: it is appended to  each cars list; it defaults
-   ;;to null.
+   ;;The optional argument CAR*-TAIL must be a list: it is appended to the cars list; it defaults to
+   ;;null.
    ;;
    ;;NOTE Let's avoid doing this with a non-tail recursion!!!
    ;;

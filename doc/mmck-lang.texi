@@ -1068,9 +1068,91 @@ proper list of pairs.
 @section Special list getters
 
 
+@defun cars-and-cdrs @var{list-of-lists}
+@defunx cars-and-cdrs @var{list-of-lists} @var{cars-tail}
+The argument @var{list-of-lists} must be a non--empty list of non--empty lists.  Return two values:
+
+@enumerate
+@item
+A list of the CARs of the lists in @var{list-of-lists}.
+
+@item
+A list of the CDRs of the lists in @var{list-of-lists}.
+@end enumerate
+
+The optional argument @var{cars-tail} is appended to the cars list; it defaults to null.
+
+@lisp
+(cars-and-cdrs '((1 2 3)
+                 (4 5 6)))
+@result{} (1 4) ((2 3) (5 6))
+
+(cars-and-cdrs '((1 2 3)
+                 (4 5 6)
+                 (7 8 9)))
+@result{} (1 4 7) ((2 3) (5 6) (8 9))
+
+(cars-and-cdrs '((1 2 3)
+                 (4 5 6))
+               '(a b))
+@result{} (1 4 a b) ((2 3) (5 6))
+
+(cars-and-cdrs '((1 2 3)
+                 (4 5 6)
+                 (7 8 9))
+               '(a b))
+@result{} (1 4 7 a b) ((2 3) (5 6) (8 9))
+@end lisp
+@end defun
+
+
+
+@defun gather-cars-in-reverse @var{list-of-lists}
+@defunx gather-cars-in-reverse @var{list-of-lists} @var{cars-tail}
+The argument @var{list-of-lists} must be a (possibly empty) list of (possibly empty) lists.  Return
+a list of lists, each sublist being the lists of cars built by iterating through @var{list-of-lists}
+from the end.  The optional argument @var{cars-tail} is appended to each cars list; it defaults to
+null.
+
+The returned value is the list of lists we would need to implement @func{fold-right}.
+
+@lisp
+(gather-cars-in-reverse '())            @result{} ()
+(gather-cars-in-reverse '(()))          @result{} ()
+(gather-cars-in-reverse '(() ()))       @result{} ()
+(gather-cars-in-reverse '(() () ()))    @result{} ()
+(gather-cars-in-reverse '((1) (4) (7))) @result{} ((1 4 7))
+
+(gather-cars-in-reverse '((1 2 3)
+                          (4 5 6)
+                          (7 8 9)))
+@result{} ((3 6 9)
+    (2 5 8)
+    (1 4 7))
+
+(define tail '(a b))
+
+(gather-cars-in-reverse '()            tail) @result{} ()
+(gather-cars-in-reverse '(())          tail) @result{} ()
+(gather-cars-in-reverse '(() ())       tail) @result{} ()
+(gather-cars-in-reverse '(() () ())    tail) @result{} ()
+(gather-cars-in-reverse '((1) (4) (7)) tail) @result{} ((1 4 7 a b))
+
+(gather-cars-in-reverse '((1 2 3)
+                          (4 5 6)
+                          (7 8 9))
+                        tail)
+@result{} ((3 6 9 a b)
+    (2 5 8 a b)
+    (1 4 7 a b))
+@end lisp
+@end defun
+
 @c page
 @node lists fold
 @section Folding lists
+
+
 
 @c page
 @node lists map
