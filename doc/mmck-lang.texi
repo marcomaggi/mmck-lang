@@ -1368,10 +1368,311 @@ list operands must be in the @var{list-of-lists}.
 @node lists map
 @section Mapping lists
 
+
+@defun map-in-order @var{proc} @vari{list} @varii{list} @dots{}
+The @var{list}s must all have the same length.  @var{proc} must accept as many arguments as there
+are @var{list}s and return a single value.  @var{proc} must not mutate any of the @var{list}s.
+
+The @func{map-in-order} procedure applies @var{proc} element--wise to the elements of the
+@var{list}s, left to right, and returns a list of the results, in order.  @var{proc} is always
+called in the same dynamic environment as @func{map-in-order} itself.  If multiple returns occur
+from @func{map-in-order}, the values returned by earlier returns are not mutated.
+
+@lisp
+(map cadr '((a b) (d e) (g h)))         @result{}  (b e h)
+
+(map (lambda (n) (expt n n))
+     '(1 2 3 4 5))                      @result{}  (1 4 27 256 3125)
+
+(map + '(1 2 3) '(4 5 6))               @result{}  (5 7 9)
+
+(let ((count 0))
+  (map (lambda (ignored)
+         (set! count (+ count 1))
+         count)
+       '(a b)))                         @result{}  (1 2) or (2 1)
+@end lisp
+@end defun
+
+
+@defun for-each-in-order @var{proc} @vari{list} @varii{list} @dots{}
+The @var{list}s must all have the same length.  @var{proc} must accept as many arguments as there
+are @var{list}s.  @var{proc} must not mutate any of the @var{list}s.
+
+The @func{for-each-in-order} procedure applies @var{proc} element--wise to the elements of the
+@var{list}s for its side effects, in order from the first elements to the last.  @var{proc} is
+always called in the same dynamic environment as @func{for-each-in-order} itself.  The return values
+of @func{for-each-in-order} are unspecified.
+
+@lisp
+(let ((v (make-vector 5)))
+  (for-each-in-order
+      (lambda (i)
+        (vector-set! v i (* i i)))
+    '(0 1 2 3 4))
+  v)
+@result{}  #(0 1 4 9 16)
+
+(for-each-in-order (lambda (x) x) '(1 2 3 4))
+@result{} unspecified
+
+(for-each-in-order even? '())
+@result{} unspecified
+@end lisp
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@subsubheading Unsafe mapping procedures
+
+
+@defun {$map/1} @var{func} @var{ell}
+Like @func{map} for a single list argument, but does not validate its arguments.
+@end defun
+
+
+@defun {$map/2} @var{func} @vari{ell} @varii{ell}
+Like @func{map} for two list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$map/3} @var{func} @vari{ell} @varii{ell} @variii{ell}
+Like @func{map} for three list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$map/list} @var{func} @var{list-of-lists}
+Like @func{map} for any number list operands, but does not validate its arguments.  All the list
+operands must be in the @var{list-of-lists}.
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@subsubheading Unsafe iteration procedures
+
+
+@defun {$for-each/1} @var{func} @var{ell}
+Like @func{for-each} for a single list argument, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-each/2} @var{func} @vari{ell} @varii{ell}
+Like @func{for-each} for two list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-each/3} @var{func} @vari{ell} @varii{ell} @variii{ell}
+Like @func{for-each} for three list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-each/list} @var{func} @var{list-of-lists}
+Like @func{for-each} for any number list operands, but does not validate its arguments.  All the
+list operands must be in the @var{list-of-lists}.
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@subsubheading Unsafe in--order mapping procedures
+
+
+@defun {$map-in-order/1} @var{func} @var{ell}
+Like @func{map-in-order} for a single list argument, but does not validate its arguments.
+@end defun
+
+
+@defun {$map-in-order/2} @var{func} @vari{ell} @varii{ell}
+Like @func{map-in-order} for two list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$map-in-order/3} @var{func} @vari{ell} @varii{ell} @variii{ell}
+Like @func{map-in-order} for three list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$map-in-order/list} @var{func} @var{list-of-lists}
+Like @func{map-in-order} for any number list operands, but does not validate its arguments.  All the
+list operands must be in the @var{list-of-lists}.
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@subsubheading Unsafe in--order iteration procedures
+
+
+@defun {$for-each-in-order/1} @var{func} @var{ell}
+Like @func{for-each-in-order} for a single list argument, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-each-in-order/2} @var{func} @vari{ell} @varii{ell}
+Like @func{for-each-in-order} for two list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-each-in-order/3} @var{func} @vari{ell} @varii{ell} @variii{ell}
+Like @func{for-each-in-order} for three list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-each-in-order/list} @var{func} @var{list-of-lists}
+Like @func{for-each-in-order} for any number list operands, but does not validate its arguments.
+All the list operands must be in the @var{list-of-lists}.
+@end defun
+
 @c page
 @node lists search
 @section Searching lists
 
+
+@defun find @var{proc} @var{list}
+@var{proc} must accept one argument and return a single value.  @var{proc} must not mutate
+@var{list}.  The @func{find} procedure applies @var{proc} to the elements of @var{list} in order.
+If @var{proc} returns a true value for an element, @func{find} immediately returns that element.  If
+@var{proc} returns @false{} for all elements of the list, @func{find} returns @false{}.  @var{proc}
+is always called in the same dynamic environment as @func{find} itself.
+
+@lisp
+(find even? '(3 1 4 1 5 9))
+@result{} 4
+
+(find even? '(3 1 5 1 5 9))
+@result{} #f
+@end lisp
+@end defun
+
+
+@defun for-all @var{proc} @vari{list} @varii{list} @dots{} @varn{list}
+@defunx exists @var{proc} @vari{list} @varii{list} @dots{} @varn{list}
+The @var{list}s must all have the same length, and @var{proc} must accept @math{n} arguments and
+return a single value.  @var{proc} must not mutate the @var{list} arguments.
+
+For natural numbers @math{i = 0, 1, @dots{}}, the @func{for-all} procedure successively applies
+@var{proc} to arguments @math{x_i^1 @dots{} x_i^n}, where @math{x_i^j} is the @math{i}-th element of
+@var{listj}, until @false{} is returned.
+
+If @var{proc} returns true values for all but the last element of @vari{list}, @func{for-all}
+performs a tail call of @var{proc} on the @math{k}-th elements, where @math{k} is the length of
+@vari{list}.  If @var{proc} returns @false{} on any set of elements, @func{for-all} returns @false{}
+after the first such application of @var{proc}.  If the @var{list}s are all empty, @func{for-all}
+returns @true{}.
+
+For natural numbers @math{i = 0, 1, @dots{}}, the @func{exists} procedure applies @var{proc}
+successively to arguments @math{x_i^1 @dots{} x_i^n}, where @math{x_i^j} is the @math{i}-th element
+of @var{listj}, until a true value is returned.
+
+If @var{proc} returns @false{} for all but the last elements of the @var{list}s, @func{exists}
+performs a tail call of @var{proc} on the @emph{k}th elements, where @emph{k} is the length of
+@vari{list}.  If @var{proc} returns a true value on any set of elements, @func{exists} returns that
+value after the first such application of @var{proc}.  If the @var{list}s are all empty,
+@func{exists} returns @false{}.
+
+@var{proc} is always called in the same dynamic environment as @func{for-all} or, respectively,
+@func{exists} itself.
+
+@lisp
+(for-all even? '(3 1 4 1 5 9))
+@result{} #f
+
+(for-all even? '(3 1 4 1 5 9 . 2))
+@result{} #f
+
+(for-all even? '(2 4 14))
+@result{} #t
+
+(for-all even? '(2 4 14 . 9))
+@error{} exception &assertion
+
+(for-all (lambda (n) (and (even? n) n))
+         '(2 4 14))
+@result{} 14
+
+(for-all < '(1 2 3) '(2 3 4))
+@result{} #t
+
+(for-all < '(1 2 4) '(2 3 4))
+@result{} #f
+
+(exists even? '(3 1 4 1 5 9))
+@result{} #t
+
+(exists even? '(3 1 1 5 9))
+@result{} #f
+
+(exists even? '(3 1 1 5 9 . 2))
+@error{} exception &assertion
+
+(exists (lambda (n) (and (even? n) n))
+        '(2 1 4 14))
+@result{} 2
+
+(exists < '(1 2 4) '(2 3 4))
+@result{} #t
+
+(exists > '(1 2 3) '(2 3 4))
+@result{} #f
+@end lisp
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@subsubheading Unsafe finding
+
+
+@defun {$find} @var{pred} @var{ell}
+Like @func{find}, but does not validate its arguments.
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@subsubheading Unsafe searching ``for all'' procedures
+
+
+@defun {$for-all/1} @var{pred} @var{ell}
+Like @func{for-all} for a single list argument, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-all/2} @var{pred} @vari{ell} @varii{ell}
+Like @func{for-all} for two list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-all/3} @var{pred} @vari{ell} @varii{ell} @variii{ell}
+Like @func{for-all} for three list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$for-all/list} @var{pred} @var{list-of-lists}
+Like @func{for-all} for any number list operands, but does not validate its arguments.  All the list
+operands must be in the @var{list-of-lists}.
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@subsubheading Unsafe searching ``exists'' procedures
+
+
+@defun {$exists/1} @var{pred} @var{ell}
+Like @func{exists} for a single list argument, but does not validate its arguments.
+@end defun
+
+
+@defun {$exists/2} @var{pred} @vari{ell} @varii{ell}
+Like @func{exists} for two list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$exists/3} @var{pred} @vari{ell} @varii{ell} @variii{ell}
+Like @func{exists} for three list arguments, but does not validate its arguments.
+@end defun
+
+
+@defun {$exists/list} @var{pred} @var{list-of-lists}
+Like @func{exists} for any number list operands, but does not validate its arguments.  All the list
+operands must be in the @var{list-of-lists}.
+@end defun
 
 @c page
 @node lists conditions
