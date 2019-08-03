@@ -103,6 +103,11 @@
      $find
 
      ;; exceptional-condition object-types
+     &list-is-empty
+     make-list-is-empty-condition
+     condition-list-is-empty?
+     raise-exception-list-is-empty
+     ;;
      &lists-are-of-different-length
      make-lists-are-of-different-length-condition
      condition-lists-are-of-different-length?
@@ -255,6 +260,20 @@
 	      (make-who-condition who)
 	      (make-message-condition "invalid arguments, lists are of different length")
 	      (make-irritants-condition (list list-of-lists)))))
+
+;;; --------------------------------------------------------------------
+
+(define-condition-type &list-is-empty
+    &assertion
+  make-list-is-empty-condition
+  condition-list-is-empty?)
+
+(define (raise-exception-list-is-empty who obj)
+  (raise
+   (condition (make-list-is-empty-condition)
+	      (make-who-condition who)
+	      (make-message-condition "invalid operand, expected non-empty list")
+	      (make-irritants-condition (list obj)))))
 
 ;;; --------------------------------------------------------------------
 
@@ -490,7 +509,7 @@
   ;;2. The last item in ELL.
   ;;
   (cond ((null? ell)
-	 (values '() (void)))
+	 (raise-exception-list-is-empty (__who__) ell))
 	((pair? ell)
 	 (let ((next (cdr ell)))
 	   (if (pair? next)

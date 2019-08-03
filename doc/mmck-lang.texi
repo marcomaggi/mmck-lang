@@ -1148,6 +1148,30 @@ The returned value is the list of lists we would need to implement @func{fold-ri
 @end lisp
 @end defun
 
+
+@defun butlast-and-last @var{ell}
+The argument @var{ell} must be a (possibly empty) proper list.  Return two values:
+
+@enumerate
+@item
+The list of all the items in @var{ell} but the last.
+
+@item
+The last item in @var{ell}.
+@end enumerate
+
+@lisp
+(butlast-and-last '())               @error{} &list-is-empty
+(butlast-and-last '(0))              @result{} () 0
+(butlast-and-last '(0 1))            @result{} (0) 1
+(butlast-and-last '(0 1 2))          @result{} (0 1) 2
+(butlast-and-last '(0 1 2 3))        @result{} (0 1 2) 3
+(butlast-and-last '(0 1 2 3 4))      @result{} (0 1 2 3) 4
+(butlast-and-last '(0 1 2 3 4 5))    @result{} (0 1 2 3 4) 5
+(butlast-and-last '(0 1 2 3 4 5 6))  @result{} (0 1 2 3 4 5) 6
+@end lisp
+@end defun
+
 @c page
 @node lists fold
 @section Folding lists

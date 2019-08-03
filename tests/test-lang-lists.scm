@@ -365,7 +365,14 @@
 ;;; --------------------------------------------------------------------
 
   (begin
-    (check (butlast-and-last '())		=> '() (void))
+    (check
+	(try
+	    (butlast-and-last '())
+	  (catch E
+	    ((&list-is-empty)
+	     (condition-who E))
+	    (else #f)))
+      => 'butlast-and-last)
     (check (butlast-and-last '(0))		=> '() 0)
     (check (butlast-and-last '(0 1))		=> '(0) 1)
     (check (butlast-and-last '(0 1 2))		=> '(0 1) 2)
