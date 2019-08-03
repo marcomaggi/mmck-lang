@@ -714,56 +714,80 @@
 
 (define ($for-all/1 pred ell)
   (or (null? ell)
-      (and (pred (car ell))
-	   ($for-all/1 pred (cdr ell)))))
+      (if (null? (cdr ell))
+	  ;;Perform a tail call for the last item.
+	  (pred (car ell))
+	(and (pred (car ell))
+	     ($for-all/1 pred (cdr ell))))))
 
 (define ($for-all/2 pred ell1 ell2)
   (or (null? ell1)
       (and (pair? ell1)
-	   (pred (car ell1) (car ell2))
-	   ($for-all/2 pred (cdr ell1) (cdr ell2)))))
+	   (if (null? (cdr ell1))
+	       ;;Perform a tail call for the last item.
+	       (pred (car ell1) (car ell2))
+	     (and (pred (car ell1) (car ell2))
+		  ($for-all/2 pred (cdr ell1) (cdr ell2)))))))
 
 (define ($for-all/3 pred ell1 ell2 ell3)
   (or (null? ell1)
       (and (pair? ell1)
-	   (pred (car ell1) (car ell2) (car ell3))
-	   ($for-all/3 pred (cdr ell1) (cdr ell2) (cdr ell3)))))
+	   (if (null? (cdr ell1))
+	       ;;Perform a tail call for the last item.
+	       (pred (car ell1) (car ell2) (car ell3))
+	     (and (pred (car ell1) (car ell2) (car ell3))
+		  ($for-all/3 pred (cdr ell1) (cdr ell2) (cdr ell3)))))))
 
 (define ($for-all/list pred ell*)
   (or (null? ell*)
       (null? (car ell*))
       (receive (car* cdr*)
 	  (cars-and-cdrs ell*)
-	(and (apply pred car*)
-	     ($for-all/list pred cdr*)))))
+	(if (null? (car cdr*))
+	    ;;Perform a tail call for the last item.
+	    (apply pred car*)
+	  (and (apply pred car*)
+	       ($for-all/list pred cdr*))))))
 
 ;;; --------------------------------------------------------------------
 
 (define ($exists/1 pred ell)
   (or (null? ell)
       (and (pair? ell)
-	   (or (pred (car ell))
-	       ($exists/1 pred (cdr ell))))))
+	   (if (null? (cdr ell))
+	       ;;Perform a tail call for the last item.
+	       (pred (car ell))
+	     (or (pred (car ell))
+		 ($exists/1 pred (cdr ell)))))))
 
 (define ($exists/2 pred ell1 ell2)
   (or (null? ell1)
       (and (pair? ell1)
-	   (or (pred (car ell1) (car ell2))
-	       ($exists/2 pred (cdr ell1) (cdr ell2))))))
+	   (if (null? (cdr ell1))
+	       ;;Perform a tail call for the last items.
+	       (pred (car ell1) (car ell2))
+	     (or (pred (car ell1) (car ell2))
+		 ($exists/2 pred (cdr ell1) (cdr ell2)))))))
 
 (define ($exists/3 pred ell1 ell2 ell3)
   (or (null? ell1)
       (and (pair? ell1)
-	   (or (pred (car ell1) (car ell2) (car ell3))
-	       ($exists/3 pred (cdr ell1) (cdr ell2) (cdr ell3))))))
+	   (if (null? (cdr ell1))
+	       ;;Perform a tail call for the last item.
+	       (pred (car ell1) (car ell2) (car ell3))
+	     (or (pred (car ell1) (car ell2) (car ell3))
+		 ($exists/3 pred (cdr ell1) (cdr ell2) (cdr ell3)))))))
 
 (define ($exists/list pred ell*)
   (or (null? ell*)
       (null? (car ell*))
       (receive (car* cdr*)
 	  (cars-and-cdrs ell*)
-	(or (apply pred car*)
-	    ($for-all/list pred cdr*)))))
+	(if (null? (car cdr*))
+	    ;;Perform a tail call for the last item.
+	    (apply pred car*)
+	  (or (apply pred car*)
+	      ($for-all/list pred cdr*))))))
 
 ;;; --------------------------------------------------------------------
 
