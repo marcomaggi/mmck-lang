@@ -852,6 +852,7 @@ consumes resources.
 * lists fold::                  Folding lists.
 * lists map::                   Mapping lists.
 * lists search::                Searching lists.
+* lists conditions::            Exceptional-condition object-types.
 @end menu
 
 @c page
@@ -1371,6 +1372,105 @@ list operands must be in the @var{list-of-lists}.
 @node lists search
 @section Searching lists
 
+
+@c page
+@node lists conditions
+@section Exceptional--condition object--types
+
+
+@menu
+* lists conditions is empty::   Exceptional condition: @condition{list-is-empty}.
+* lists conditions diff len::   Exceptional condition: @condition{lists-are-of-different-length}.
+* lists conditions empty len::  Exceptional condition: @condition{lists-are-empty-or-of-different-length}.
+@end menu
+
+@c page
+@node lists conditions is empty
+@subsection Exceptional condition: @condition{list-is-empty}
+
+
+@deftp {Condition Object} @acondition{list-is-empty}
+Exceptional--condition object--type representing an invalid empty list operand: a non--empty proper
+list was expected.
+@end deftp
+
+
+@defun make-list-is-empty-condition
+Build and return a new exceptional--condition object of type @condition{list-is-empty}.
+@end defun
+
+
+@defun condition-list-is-empty? @var{obj}
+Return @true{} if @var{obj} is an exceptional--condition object of type @condition{list-is-empty} or
+a compound condition object having a component of type @condition{list-is-empty}; otherwise return
+@false{}.
+@end defun
+
+
+@defun raise-exception-list-is-empty @var{who} @var{obj}
+Raise a non--continuable exception with compound condition object having components:
+@condition{list-is-empty}; @condition{who}; @condition{message}; @condition{irritants}.
+@end defun
+
+@c page
+@node lists conditions diff len
+@subsection Exceptional condition: @condition{lists-are-of-different-length}
+
+
+@deftp {Condition Object} @acondition{lists-are-of-different-length}
+Exceptional--condition object--type representing invalid list operands: a proper lists with the same
+length were expected.
+@end deftp
+
+
+@defun make-lists-are-of-different-length-condition
+Build and return a new exceptional--condition object of type
+@condition{lists-are-of-different-length}.
+@end defun
+
+
+@defun condition-lists-are-of-different-length? @var{obj}
+Return @true{} if @var{obj} is an exceptional--condition object of type
+@condition{lists-are-of-different-length} or a compound condition object having a component of type
+@condition{lists-are-of-different-length}; otherwise return @false{}.
+@end defun
+
+
+@defun raise-exception-lists-are-of-different-length @var{who} @var{obj}
+Raise a non--continuable exception with compound condition object having components:
+@condition{lists-are-of-different-length}; @condition{who}; @condition{message};
+@condition{irritants}.
+@end defun
+
+@c page
+@node lists conditions empty len
+@subsection Exceptional condition: @condition{lists-are-empty-or-of-different-length}
+
+
+@deftp {Condition Object} @acondition{lists-are-empty-or-of-different-length}
+Exceptional--condition object--type representing invalid list operands: a proper lists with the same
+length were expected.
+@end deftp
+
+
+@defun make-lists-are-empty-or-of-different-length-condition
+Build and return a new exceptional--condition object of type
+@condition{lists-are-empty-or-of-different-length}.
+@end defun
+
+
+@defun condition-lists-are-empty-or-of-different-length? @var{obj}
+Return @true{} if @var{obj} is an exceptional--condition object of type
+@condition{lists-are-empty-or-of-different-length} or a compound condition object having a component of type
+@condition{lists-are-empty-or-of-different-length}; otherwise return @false{}.
+@end defun
+
+
+@defun raise-exception-lists-are-empty-or-of-different-length @var{who} @var{obj}
+Raise a non--continuable exception with compound condition object having components:
+@condition{lists-are-empty-or-of-different-length}; @condition{who}; @condition{message};
+@condition{irritants}.
+@end defun
 
 @c page
 @node vectors
