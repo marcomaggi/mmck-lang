@@ -40,6 +40,8 @@
 
 ;;;; helpers
 
+(define numbers '(0 1 2 3 4 5 6 7 8 9))
+
 (define-syntax check-lists-are-of-different-length
   (syntax-rules ()
     ((_ ?expr)
@@ -817,6 +819,878 @@
 	  (4 5 6 7)
 	  (a b c d)))
     => '((1 5 9 4 a) (2 6 1 5 b) (3 7 2 6 c) (4 8 3 7 d) . 0))
+
+  (values))
+
+
+(parameterise ((check-test-name		'map-in-order))
+
+  (define numbers '(0 1 2 3 4 5 6 7 8 9))
+
+  (check
+      (map-in-order - '())
+    => '())
+
+  (check
+      (map-in-order - '() '())
+    => '())
+
+  (check
+      (map-in-order - '() '() '())
+    => '())
+
+  (check
+      (map-in-order - numbers)
+    => '(0 -1 -2 -3 -4 -5 -6 -7 -8 -9))
+
+  (check
+      (map-in-order +
+	'(1 2 3)
+	'(10 20 30))
+    => '(11 22 33))
+
+  (check
+      (map-in-order +
+	'(1 2 3)
+	'(10 20 30)
+	'(100 200 300))
+    => '(111 222 333))
+
+  (check
+      (map-in-order +
+	'(1 2 3)
+	'(10 20 30)
+	'(100 200 300)
+	'(1000 2000 3000))
+    => '(1111 2222 3333))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-map-in-order))
+
+  (check
+      ($map-in-order/1 - '())
+    => '())
+
+  (check
+      ($map-in-order/1 - numbers)
+    => '(0 -1 -2 -3 -4 -5 -6 -7 -8 -9))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($map-in-order/2 - '() '())
+    => '())
+
+  (check
+      ($map-in-order/2 +
+	'(1 2 3)
+	'(10 20 30))
+    => '(11 22 33))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($map-in-order/3 - '() '() '())
+    => '())
+
+  (check
+      ($map-in-order/3 +
+	'(1 2 3)
+	'(10 20 30)
+	'(100 200 300))
+    => '(111 222 333))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($map-in-order/list + '(() () () ()))
+    => '())
+
+  (check
+      ($map-in-order/list +
+	'((1 2 3)
+	  (10 20 30)
+	  (100 200 300)
+	  (1000 2000 3000)))
+    => '(1111 2222 3333))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-map))
+
+  (check
+      ($map/1 - '())
+    => '())
+
+  (check
+      ($map/1 - numbers)
+    => '(0 -1 -2 -3 -4 -5 -6 -7 -8 -9))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($map/2 - '() '())
+    => '())
+
+  (check
+      ($map/2 +
+	'(1 2 3)
+	'(10 20 30))
+    => '(11 22 33))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($map/3 - '() '() '())
+    => '())
+
+  (check
+      ($map/3 +
+	'(1 2 3)
+	'(10 20 30)
+	'(100 200 300))
+    => '(111 222 333))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($map/list + '(() () () ()))
+    => '())
+
+  (check
+      ($map/list +
+	'((1 2 3)
+	  (10 20 30)
+	  (100 200 300)
+	  (1000 2000 3000)))
+    => '(1111 2222 3333))
+
+  (values))
+
+
+(parameterise ((check-test-name		'for-each-in-order))
+
+  (define numbers '(0 1 2 3 4 5 6 7 8 9))
+
+  (check
+      (let ((r 0))
+	(for-each-in-order
+	    (lambda (e)
+	      (set! r (+ e r)))
+	  '())
+	r)
+    => 0)
+
+  (check
+      (let ((r 0))
+	(for-each-in-order
+	    (lambda (e1 e2)
+	      (set! r (+ e1 e2 r)))
+	  '() '())
+	r)
+    => 0)
+
+  (check
+      (let ((r 0))
+	(for-each-in-order
+	    (lambda (e1 e2 e3)
+	      (set! r (+ e1 e2 e3 r)))
+	  '() '() '())
+	r)
+    => 0)
+
+  (check
+      (let ((r '(0 0)))
+	(for-each-in-order
+	    (lambda (e1 e2)
+	      (set! r (list (+ e1 (car r))
+			    (+ e2 (cadr r)))))
+	  '(1 10 100)
+	  '(2 20 200))
+	r)
+    => '(111 222))
+
+
+  (check
+      (let ((r '(0 0 0)))
+	(for-each-in-order
+	    (lambda (e1 e2 e3)
+	      (set! r (list (+ e1 (car r))
+			    (+ e2 (cadr r))
+			    (+ e3 (caddr r)))))
+	  '(1 10 100)
+	  '(2 20 200)
+	  '(3 30 300))
+	r)
+    => '(111 222 333))
+
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-for-each-in-order))
+
+  (define numbers '(0 1 2 3 4 5 6 7 8 9))
+
+  (check
+      (let ((r 0))
+	($for-each-in-order/1
+	    (lambda (e)
+	      (set! r (+ e r)))
+	  '())
+	r)
+    => 0)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((r 0))
+	($for-each-in-order/2
+	    (lambda (e1 e2)
+	      (set! r (+ e1 e2 r)))
+	  '() '())
+	r)
+    => 0)
+
+  (check
+      (let ((r '(0 0)))
+	($for-each-in-order/2
+	    (lambda (e1 e2)
+	      (set! r (list (+ e1 (car r))
+			    (+ e2 (cadr r)))))
+	  '(1 10 100)
+	  '(2 20 200))
+	r)
+    => '(111 222))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((r 0))
+	($for-each-in-order/3
+	    (lambda (e1 e2 e3)
+	      (set! r (+ e1 e2 e3 r)))
+	  '() '() '())
+	r)
+    => 0)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((r '(0 0 0)))
+	($for-each-in-order/3
+	    (lambda (e1 e2 e3)
+	      (set! r (list (+ e1 (car r))
+			    (+ e2 (cadr r))
+			    (+ e3 (caddr r)))))
+	  '(1 10 100)
+	  '(2 20 200)
+	  '(3 30 300))
+	r)
+    => '(111 222 333))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((r '(0 0 0 0)))
+	($for-each-in-order/list
+	    (lambda (e1 e2 e3 e4)
+	      (set! r (list (+ e1 (car r))
+			    (+ e2 (cadr r))
+			    (+ e3 (caddr r))
+			    (+ e4 (cadddr r)))))
+	  '((1 10 100)
+	    (2 20 200)
+	    (3 30 300)
+	    (4 40 400)))
+	r)
+    => '(111 222 333 444))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-for-each))
+
+  (define numbers '(0 1 2 3 4 5 6 7 8 9))
+
+  (check
+      (let ((r 0))
+	($for-each/1
+	    (lambda (e)
+	      (set! r (+ e r)))
+	  '())
+	r)
+    => 0)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((r 0))
+	($for-each/2
+	    (lambda (e1 e2)
+	      (set! r (+ e1 e2 r)))
+	  '() '())
+	r)
+    => 0)
+
+  (check
+      (let ((r '(0 0)))
+	($for-each/2
+	    (lambda (e1 e2)
+	      (set! r (list (+ e1 (car r))
+			    (+ e2 (cadr r)))))
+	  '(1 10 100)
+	  '(2 20 200))
+	r)
+    => '(111 222))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((r 0))
+	($for-each/3
+	    (lambda (e1 e2 e3)
+	      (set! r (+ e1 e2 e3 r)))
+	  '() '() '())
+	r)
+    => 0)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((r '(0 0 0)))
+	($for-each/3
+	    (lambda (e1 e2 e3)
+	      (set! r (list (+ e1 (car r))
+			    (+ e2 (cadr r))
+			    (+ e3 (caddr r)))))
+	  '(1 10 100)
+	  '(2 20 200)
+	  '(3 30 300))
+	r)
+    => '(111 222 333))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((r '(0 0 0 0)))
+	($for-each/list
+	    (lambda (e1 e2 e3 e4)
+	      (set! r (list (+ e1 (car r))
+			    (+ e2 (cadr r))
+			    (+ e3 (caddr r))
+			    (+ e4 (cadddr r)))))
+	  '((1 10 100)
+	    (2 20 200)
+	    (3 30 300)
+	    (4 40 400)))
+	r)
+    => '(111 222 333 444))
+
+  (values))
+
+
+(parameterise ((check-test-name		'find))
+
+  (check
+      (find even? '())
+    => #f)
+
+  (check
+      (find even? '(1))
+    => #f)
+
+  (check
+      (find even? '(2))
+    => 2)
+
+  (check
+      (find even? '(1 2 3))
+    => 2)
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-find))
+
+  (check
+      ($find even? '())
+    => #f)
+
+  (check
+      ($find even? '(1))
+    => #f)
+
+  (check
+      ($find even? '(2))
+    => 2)
+
+  (check
+      ($find even? '(1 2 3))
+    => 2)
+
+  (values))
+
+
+(parameterise ((check-test-name		'exists))
+
+  (check
+      (exists (lambda (item)
+		(even? item))
+	'())
+    => #f)
+
+  (check
+      (exists (lambda (item)
+		(if (even? item)
+		    (vector item)
+		  #f))
+	'(1 3 5 6 8 10))
+    => '#(6))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (exists (lambda (item1 item2)
+		(if (< 10 (+ item1 item2))
+		    (vector item1 item2)
+		  #f))
+	'()
+	'())
+    => #f)
+
+  (check
+      (exists (lambda (item1 item2)
+		(if (< 10 (+ item1 item2))
+		    (vector item1 item2)
+		  #f))
+	'(1 3 5 7)
+	'(2 4 6 8))
+    => '#(5 6))
+
+  (check
+      (exists (lambda (item1 item2)
+		(if (< 10 (+ item1 item2))
+		    (vector item1 item2)
+		  #f))
+	'(1 2 3)
+	'(4 5 6))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (exists (lambda (item1 item2 item3)
+		(if (< 10 (+ item1 item2 item3))
+		    (vector item1 item2 item3)
+		  #f))
+	'()
+	'()
+	'())
+    => #f)
+
+  (check
+      (exists (lambda (item1 item2 item3)
+		(if (< 10 (+ item1 item2 item3))
+		    (vector item1 item2 item3)
+		  #f))
+	'(1 3 5 7)
+	'(2 4 6 8)
+	'(3 5 7 9))
+    => '#(3 4 5))
+
+  (check
+      (exists (lambda (item1 item2 item3)
+		(if (< 10 (+ item1 item2 item3))
+		    (vector item1 item2 item3)
+		  #f))
+	'(1 2 3)
+	'(1.1 2.2 3.3)
+	'(1.11 2.22 3.33))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (exists (lambda (item1 item2 item3 item4)
+		(if (< 10 (+ item1 item2 item3 item4))
+		    (vector item1 item2 item3 item4)
+		  #f))
+	'()
+	'()
+	'()
+	'())
+    => #f)
+
+  (check
+      (exists (lambda (item1 item2 item3 item4)
+		(if (< 10 (+ item1 item2 item3 item4))
+		    (vector item1 item2 item3 item4)
+		  #f))
+	'(1 3 5 7)
+	'(2 4 6 8)
+	'(3 5 7 9)
+	'(4 6 8 10))
+    => '#(3 4 5 6))
+
+  (check
+      (exists (lambda (item1 item2 item3 item4)
+		(if (< 100 (+ item1 item2 item3 item4))
+		    (vector item1 item2 item3 item4)
+		  #f))
+	'(1 2 3)
+	'(1.1 2.2 3.3)
+	'(1.11 2.22 3.33)
+	'(1.111 2.222 3.333))
+    => #f)
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-exists))
+
+  (check
+      ($exists/1 (lambda (item)
+		   (even? item))
+	'())
+    => #f)
+
+  (check
+      ($exists/1 (lambda (item)
+		   (if (even? item)
+		       (vector item)
+		     #f))
+	'(1 3 5 6 8 10))
+    => '#(6))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($exists/2 (lambda (item1 item2)
+		   (if (< 10 (+ item1 item2))
+		       (vector item1 item2)
+		     #f))
+	'()
+	'())
+    => #f)
+
+  (check
+      ($exists/2 (lambda (item1 item2)
+		   (if (< 10 (+ item1 item2))
+		       (vector item1 item2)
+		     #f))
+	'(1 3 5 7)
+	'(2 4 6 8))
+    => '#(5 6))
+
+  (check
+      ($exists/2 (lambda (item1 item2)
+		   (if (< 10 (+ item1 item2))
+		       (vector item1 item2)
+		     #f))
+	'(1 2 3)
+	'(4 5 6))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($exists/3 (lambda (item1 item2 item3)
+		   (if (< 10 (+ item1 item2 item3))
+		       (vector item1 item2 item3)
+		     #f))
+	'()
+	'()
+	'())
+    => #f)
+
+  (check
+      ($exists/3 (lambda (item1 item2 item3)
+		   (if (< 10 (+ item1 item2 item3))
+		       (vector item1 item2 item3)
+		     #f))
+	'(1 3 5 7)
+	'(2 4 6 8)
+	'(3 5 7 9))
+    => '#(3 4 5))
+
+  (check
+      ($exists/3 (lambda (item1 item2 item3)
+		   (if (< 10 (+ item1 item2 item3))
+		       (vector item1 item2 item3)
+		     #f))
+	'(1 2 3)
+	'(1.1 2.2 3.3)
+	'(1.11 2.22 3.33))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($exists/list (lambda (item1 item2 item3 item4)
+		      (if (< 10 (+ item1 item2 item3 item4))
+			  (vector item1 item2 item3 item4)
+			#f))
+	'(()
+	  ()
+	  ()
+	  ()))
+    => #f)
+
+  (check
+      ($exists/list (lambda (item1 item2 item3 item4)
+		      (if (< 10 (+ item1 item2 item3 item4))
+			  (vector item1 item2 item3 item4)
+			#f))
+	'((1 3 5 7)
+	  (2 4 6 8)
+	  (3 5 7 9)
+	  (4 6 8 10)))
+    => '#(3 4 5 6))
+
+  (check
+      ($exists/list (lambda (item1 item2 item3 item4)
+		      (if (< 100 (+ item1 item2 item3 item4))
+			  (vector item1 item2 item3 item4)
+			#f))
+	'((1 2 3)
+	  (1.1 2.2 3.3)
+	  (1.11 2.22 3.33)
+	  (1.111 2.222 3.333)))
+    => #f)
+
+  (values))
+
+
+(parameterise ((check-test-name		'for-all))
+
+  (check
+      (for-all (lambda (item)
+		 (even? item))
+	'())
+    => #t)
+
+  (check
+      (for-all (lambda (item)
+		 (number? item))
+	'(1 3 5 6 8 10))
+    => #t)
+
+  (check
+      (for-all (lambda (item)
+		 (even? item))
+	'(1 3 5 6 8 10))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (for-all (lambda (item1 item2)
+		 (< 10 (+ item1 item2)))
+	'()
+	'())
+    => #t)
+
+  (check
+      (for-all (lambda (item1 item2)
+		 (< 1 (+ item1 item2)))
+	'(1 3 5 7)
+	'(2 4 6 8))
+    => #t)
+
+  (check
+      (for-all (lambda (item1 item2)
+		 (if (< 10 (+ item1 item2))
+		     (vector item1 item2)
+		   #f))
+	'(1 2 3)
+	'(4 5 6))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (for-all (lambda (item1 item2 item3)
+		 (if (< 10 (+ item1 item2 item3))
+		     (vector item1 item2 item3)
+		   #f))
+	'()
+	'()
+	'())
+    => #t)
+
+  (check
+      (for-all (lambda (item1 item2 item3)
+		 (if (< 1 (+ item1 item2 item3))
+		     (vector item1 item2 item3)
+		   #f))
+	'(1 3 5 7)
+	'(2 4 6 8)
+	'(3 5 7 9))
+    => #t)
+
+  (check
+      (for-all (lambda (item1 item2 item3)
+		 (if (< 10 (+ item1 item2 item3))
+		     (vector item1 item2 item3)
+		   #f))
+	'(1 2 3)
+	'(1.1 2.2 3.3)
+	'(1.11 2.22 3.33))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (for-all (lambda (item1 item2 item3 item4)
+		 (if (< 10 (+ item1 item2 item3 item4))
+		     (vector item1 item2 item3 item4)
+		   #f))
+	'()
+	'()
+	'()
+	'())
+    => #t)
+
+  (check
+      (for-all (lambda (item1 item2 item3 item4)
+		 (if (< 3 (+ item1 item2 item3 item4))
+		     (vector item1 item2 item3 item4)
+		   #f))
+	'(1 3 5 7)
+	'(2 4 6 8)
+	'(3 5 7 9)
+	'(4 6 8 10))
+    => #t)
+
+  (check
+      (for-all (lambda (item1 item2 item3 item4)
+		 (if (< 100 (+ item1 item2 item3 item4))
+		     (vector item1 item2 item3 item4)
+		   #f))
+	'(1 2 3)
+	'(1.1 2.2 3.3)
+	'(1.11 2.22 3.33)
+	'(1.111 2.222 3.333))
+    => #f)
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-for-all))
+
+  (check
+      ($for-all/1 (lambda (item)
+		    (even? item))
+	'())
+    => #t)
+
+  (check
+      ($for-all/1 (lambda (item)
+		    (number? item))
+	'(1 3 5 6 8 10))
+    => #t)
+
+  (check
+      ($for-all/1 (lambda (item)
+		    (even? item))
+	'(1 3 5 6 8 10))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($for-all/2 (lambda (item1 item2)
+		    (< 10 (+ item1 item2)))
+	'()
+	'())
+    => #t)
+
+  (check
+      ($for-all/2 (lambda (item1 item2)
+		    (< 1 (+ item1 item2)))
+	'(1 3 5 7)
+	'(2 4 6 8))
+    => #t)
+
+  (check
+      ($for-all/2 (lambda (item1 item2)
+		    (if (< 10 (+ item1 item2))
+			(vector item1 item2)
+		      #f))
+	'(1 2 3)
+	'(4 5 6))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($for-all/3 (lambda (item1 item2 item3)
+		    (if (< 10 (+ item1 item2 item3))
+			(vector item1 item2 item3)
+		      #f))
+	'()
+	'()
+	'())
+    => #t)
+
+  (check
+      ($for-all/3 (lambda (item1 item2 item3)
+		    (if (< 1 (+ item1 item2 item3))
+			(vector item1 item2 item3)
+		      #f))
+	'(1 3 5 7)
+	'(2 4 6 8)
+	'(3 5 7 9))
+    => #t)
+
+  (check
+      ($for-all/3 (lambda (item1 item2 item3)
+		    (if (< 10 (+ item1 item2 item3))
+			(vector item1 item2 item3)
+		      #f))
+	'(1 2 3)
+	'(1.1 2.2 3.3)
+	'(1.11 2.22 3.33))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($for-all/list (lambda (item1 item2 item3 item4)
+		       (if (< 10 (+ item1 item2 item3 item4))
+			   (vector item1 item2 item3 item4)
+			 #f))
+	'(()
+	  ()
+	  ()
+	  ()))
+    => #t)
+
+  (check
+      ($for-all/list (lambda (item1 item2 item3 item4)
+		       (if (< 3 (+ item1 item2 item3 item4))
+			   (vector item1 item2 item3 item4)
+			 #f))
+	'((1 3 5 7)
+	  (2 4 6 8)
+	  (3 5 7 9)
+	  (4 6 8 10)))
+    => #t)
+
+  (check
+      ($for-all/list (lambda (item1 item2 item3 item4)
+		       (if (< 100 (+ item1 item2 item3 item4))
+			   (vector item1 item2 item3 item4)
+			 #f))
+	'((1 2 3)
+	  (1.1 2.2 3.3)
+	  (1.11 2.22 3.33)
+	  (1.111 2.222 3.333)))
+    => #f)
 
   (values))
 
