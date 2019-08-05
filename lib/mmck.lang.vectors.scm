@@ -113,6 +113,7 @@
   (import (scheme)
 	  (only (chicken base)
 		add1
+		sub1
 		call/cc
 		void
 		when)
@@ -120,7 +121,6 @@
 	  (mmck lang core)
 	  (mmck lang assertions)
 	  (only (mmck lang lists)
-		butlast-and-last
 		cons*
 		fold-left
 		$map/1)
@@ -455,58 +455,58 @@
   (let ((vec.len (vector-length vec)))
     (if (zero? vec.len)
 	knil
-      (let ((i.start (+ -1 vec.len)))
+      (let ((i.start (sub1 vec.len)))
 	(let loop ((i		i.start)
-		   (i-1		(+ -1 i.start))
+		   (i-1		(sub1 i.start))
 		   (knil	knil))
 	  (if (zero? i-1)
 	      ;;Last call to COMBINE is in tail position.
 	      (combine knil (vector-ref vec i))
-	    (loop i-1 (+ -1 i)
+	    (loop i-1 (sub1 i)
 		  (combine knil (vector-ref vec i)))))))))
 
 (define ($vector-fold-right/2 combine knil vec1 vec2)
   (let ((vec.len (vector-length vec1)))
     (if (zero? vec.len)
 	knil
-      (let ((i.start (+ -1 vec.len)))
+      (let ((i.start (sub1 vec.len)))
 	(let loop ((i		i.start)
-		   (i-1		(+ -1 i.start))
+		   (i-1		(sub1 i.start))
 		   (knil	knil))
 	  (if (zero? i-1)
 	      ;;Last call to COMBINE is in tail position.
 	      (combine knil (vector-ref vec1 i) (vector-ref vec2 i))
-	    (loop i-1 (+ -1 i)
+	    (loop i-1 (sub1 i)
 		  (combine knil (vector-ref vec1 i) (vector-ref vec2 i)))))))))
 
 (define ($vector-fold-right/3 combine knil vec1 vec2 vec3)
   (let ((vec.len (vector-length vec1)))
     (if (zero? vec.len)
 	knil
-      (let ((i.start (+ -1 vec.len)))
+      (let ((i.start (sub1 vec.len)))
 	(let loop ((i		i.start)
-		   (i-1		(+ -1 i.start))
+		   (i-1		(sub1 i.start))
 		   (knil	knil))
 	  (if (zero? i-1)
 	      ;;Last call to COMBINE is in tail position.
 	      (combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i))
-	    (loop i-1 (+ -1 i)
+	    (loop i-1 (sub1 i)
 		  (combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i)))))))))
 
 (define ($vector-fold-right/list combine knil vec*)
   (let ((vec.len (vector-length (car vec*))))
     (if (zero? vec.len)
 	knil
-      (let ((i.start (+ -1 vec.len)))
+      (let ((i.start (sub1 vec.len)))
 	(let loop ((i		i.start)
-		   (i-1		(+ -1 i.start))
+		   (i-1		(sub1 i.start))
 		   (knil	knil))
 	  (if (zero? i-1)
 	      ;;Last call to COMBINE is in tail position.
 	      (apply combine knil ($map/1 (lambda (vec)
 					    (vector-ref vec i))
 				    vec*))
-	    (loop i-1 (+ -1 i)
+	    (loop i-1 (sub1 i)
 		  (apply combine knil ($map/1 (lambda (vec)
 						(vector-ref vec i))
 					vec*)))))))))

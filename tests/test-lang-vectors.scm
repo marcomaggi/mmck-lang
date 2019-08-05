@@ -49,6 +49,37 @@
   (values))
 
 
+(parameterise ((check-test-name		'predicates))
+
+  (check-for-true	(list-of-vectors? '()))
+  (check-for-true	(list-of-vectors? '(#(a))))
+  (check-for-true	(list-of-vectors? '(#(a) #(b))))
+  ;;
+  (check-for-false	(list-of-vectors? '#()))
+  (check-for-false	(list-of-vectors? '(#(a) 123)))
+  (check-for-false	(list-of-vectors? 123))
+
+;;; --------------------------------------------------------------------
+
+  (check-for-true	(list-of-vectors-of-equal-length? '()))
+  (check-for-true	(list-of-vectors-of-equal-length? '(#(a))))
+  (check-for-true	(list-of-vectors-of-equal-length? '(#(a) #(b))))
+
+  (check-for-false	(list-of-vectors-of-equal-length? '(#(a) (b))))
+  (check-for-false	(list-of-vectors-of-equal-length? '(#(a) #(a b))))
+
+;;; --------------------------------------------------------------------
+
+  (check-for-true	(vectors-of-equal-length? '#()))
+  (check-for-true	(vectors-of-equal-length? '#(a)))
+  (check-for-true	(vectors-of-equal-length? '#(a) '#(b)))
+
+  (check-for-false	(vectors-of-equal-length? '#(a) '(b)))
+  (check-for-false	(vectors-of-equal-length? '#(a) '#(a b)))
+
+  (values))
+
+
 ;;;; done
 
 (check-report)
