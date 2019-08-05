@@ -403,7 +403,7 @@
 	(if (= i+1 vec.len)
 	    ;;Last call to COMBINE is in tail position.
 	    (combine knil (vector-ref vec i))
-	  (loop i+1 (+ 1 i)
+	  (loop i+1 (+ 1 i+1)
 		(combine knil (vector-ref vec i))))))))
 
 (define ($vector-fold-left/2 combine knil vec1 vec2)
@@ -416,7 +416,7 @@
 	(if (= i+1 vec.len)
 	    ;;Last call to COMBINE is in tail position.
 	    (combine knil (vector-ref vec1 i) (vector-ref vec2 i))
-	  (loop i+1 (+ 1 i)
+	  (loop i+1 (+ 1 i+1)
 		(combine knil (vector-ref vec1 i) (vector-ref vec2 i))))))))
 
 (define ($vector-fold-left/3 combine knil vec1 vec2 vec3)
@@ -429,7 +429,7 @@
 	(if (= i+1 vec.len)
 	    ;;Last call to COMBINE is in tail position.
 	    (combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i))
-	  (loop i+1 (+ 1 i)
+	  (loop i+1 (+ 1 i+1)
 		(combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i))))))))
 
 (define ($vector-fold-left/list combine knil vec*)
@@ -444,7 +444,7 @@
 	    (apply combine knil ($map/1 (lambda (vec)
 					  (vector-ref vec i))
 				  vec*))
-	  (loop i+1 (+ 1 i)
+	  (loop i+1 (+ 1 i+1)
 		(apply combine knil ($map/1 (lambda (vec)
 					      (vector-ref vec i))
 				      vec*))))))))
@@ -462,7 +462,7 @@
 	  (if (zero? i-1)
 	      ;;Last call to COMBINE is in tail position.
 	      (combine knil (vector-ref vec i))
-	    (loop i-1 (sub1 i)
+	    (loop i-1 (sub1 i-1)
 		  (combine knil (vector-ref vec i)))))))))
 
 (define ($vector-fold-right/2 combine knil vec1 vec2)
@@ -476,7 +476,7 @@
 	  (if (zero? i-1)
 	      ;;Last call to COMBINE is in tail position.
 	      (combine knil (vector-ref vec1 i) (vector-ref vec2 i))
-	    (loop i-1 (sub1 i)
+	    (loop i-1 (sub1 i-1)
 		  (combine knil (vector-ref vec1 i) (vector-ref vec2 i)))))))))
 
 (define ($vector-fold-right/3 combine knil vec1 vec2 vec3)
@@ -490,7 +490,7 @@
 	  (if (zero? i-1)
 	      ;;Last call to COMBINE is in tail position.
 	      (combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i))
-	    (loop i-1 (sub1 i)
+	    (loop i-1 (sub1 i-1)
 		  (combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i)))))))))
 
 (define ($vector-fold-right/list combine knil vec*)
@@ -506,7 +506,7 @@
 	      (apply combine knil ($map/1 (lambda (vec)
 					    (vector-ref vec i))
 				    vec*))
-	    (loop i-1 (sub1 i)
+	    (loop i-1 (sub1 i-1)
 		  (apply combine knil ($map/1 (lambda (vec)
 						(vector-ref vec i))
 					vec*)))))))))

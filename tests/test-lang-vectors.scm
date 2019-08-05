@@ -80,6 +80,18 @@
   (values))
 
 
+(parameterise ((check-test-name		'left-fold))
+
+  (check
+      (vector-fold-left (lambda (knil item)
+			  (cons item knil))
+			'(0)
+			'#(a b c))
+    => '(c b a 0))
+
+  (values))
+
+
 ;;;; done
 
 (check-report)
