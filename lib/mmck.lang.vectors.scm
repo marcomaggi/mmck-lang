@@ -39,21 +39,92 @@
      (syntax: $vector-set!)
      (syntax: $vector-set-immediate!)
      (syntax: $vector-length)
+
+     ;; predicates
+     list-of-vectors?
+     vectors-of-equal-length?
+     list-of-vectors-of-equal-length?
+
+     ;; iteration and searching
+     vector-fold-left vector-fold-right
+     vector-find vector-exists vector-for-all
+     vector-map vector-for-each
+     vector-map-in-order vector-for-each-in-order
+
+     ;; unsafe iteration and searching
+     $vector-fold-left/1
+     $vector-fold-left/2
+     $vector-fold-left/3
+     $vector-fold-left/list
+     ;;
+     $vector-fold-right/1
+     $vector-fold-right/2
+     $vector-fold-right/3
+     $vector-fold-right/list
+     ;;
+     $vector-map/1
+     $vector-map/2
+     $vector-map/3
+     $vector-map/list
+     ;;
+     $vector-for-each/1
+     $vector-for-each/2
+     $vector-for-each/3
+     $vector-for-each/list
+     ;;
+     $vector-map-in-order/1
+     $vector-map-in-order/2
+     $vector-map-in-order/3
+     $vector-map-in-order/list
+     ;;
+     $vector-for-each-in-order/1
+     $vector-for-each-in-order/2
+     $vector-for-each-in-order/3
+     $vector-for-each-in-order/list
+     ;;
+     $vector-for-all/1
+     $vector-for-all/2
+     $vector-for-all/3
+     $vector-for-all/list
+     ;;
+     $vector-exists/1
+     $vector-exists/2
+     $vector-exists/3
+     $vector-exists/list
+     ;;
+     $vector-find
+
+     ;; exceptional-condition object-types
+     &vector-is-empty
+     make-vector-is-empty-condition
+     condition-vector-is-empty?
+     raise-exception-vector-is-empty
+     ;;
+     &vectors-are-of-different-length
+     make-vectors-are-of-different-length-condition
+     condition-vectors-are-of-different-length?
+     raise-exception-vectors-are-of-different-length
+     ;;
+     &vectors-are-empty-or-of-different-length
+     make-vectors-are-empty-or-of-different-length-condition
+     condition-vectors-are-empty-or-of-different-length?
+     raise-exception-vectors-are-empty-or-of-different-length
      )
   (import (scheme)
 	  (only (chicken base)
+		add1
+		call/cc
+		void
 		when)
-	  (only (chicken fixnum)
-		fx=
-		fx<
-		fx<=
-		fx+
-		fx-)
 	  (mmck lang debug)
 	  (mmck lang core)
 	  (mmck lang assertions)
 	  (only (mmck lang lists)
-		fold-left))
+		butlast-and-last
+		cons*
+		fold-left
+		$map/1)
+	  (mmck exceptional-conditions))
 
 
 ;;;; unsafe operations
@@ -84,12 +155,602 @@
   (##sys#size ?vector))
 
 
+;;;; helpers
+
+(define-syntax define-vector-folder
+  (syntax-rules ()
+    ((_ ?who ?vector-folder/1 ?vector-folder/2 ?vector-folder/3 ?vector-folder/list)
+     (case-define ?who
+       ((combine nil ell)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell     2))
+	(?vector-folder/1 combine nil ell))
+
+       ((combine nil ell1 ell2)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1    2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2    3)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2))
+	(?vector-folder/2 combine nil ell1 ell2))
+
+       ((combine nil ell1 ell2 ell3)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1    2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2    3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell3    4)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3))
+	(?vector-folder/3 combine nil ell1 ell2 ell3))
+
+       ((combine nil ell1 ell2 ell3 . ell*)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1    2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2    3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell3    4)
+	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? ell*)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
+	(?vector-folder/list combine nil (cons* ell1 ell2 ell3 ell*)))))
+    ))
+
+(define-syntax define-vector-mapper
+  (syntax-rules ()
+    ((_ ?who ?vector-mapper/1 ?vector-mapper/2 ?vector-mapper/3 ?vector-mapper/list)
+     (case-define ?who
+       ((func ell)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell  2))
+	(?vector-mapper/1 func ell))
+
+       ((func ell1 ell2)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2))
+	(?vector-mapper/2 func ell1 ell2))
+
+       ((func ell1 ell2 ell3)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell3 4)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3))
+	(?vector-mapper/3 func ell1 ell2 ell3))
+
+       ((func ell1 ell2 ell3 . ell*)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell3 4)
+	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? ell*)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
+	(?vector-mapper/list func (cons* ell1 ell2 ell3 ell*)))))
+    ))
+
+(define-syntax define-vector-searcher
+  (syntax-rules ()
+    ((_ ?who ?vector-searcher/1 ?vector-searcher/2 ?vector-searcher/3 ?vector-searcher/list)
+     (case-define ?who
+       ((pred ell)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell  2))
+	(?vector-searcher/1 pred ell))
+
+       ((pred ell1 ell2)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2))
+	(?vector-searcher/2 pred ell1 ell2))
+
+       ((pred ell1 ell2 ell3)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell3 4)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3))
+	(?vector-searcher/3 pred ell1 ell2 ell3))
+
+       ((pred ell1 ell2 ell3 . ell*)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      ell3 4)
+	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? ell*)
+	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
+	(?vector-searcher/list pred (cons* ell1 ell2 ell3 ell*)))))
+    ))
+
+
+;;;; exceptional-condition object-types
+
+(define-condition-type &vectors-are-of-different-length
+    &assertion
+  make-vectors-are-of-different-length-condition
+  condition-vectors-are-of-different-length?)
+
+(define (raise-exception-vectors-are-of-different-length who vector-of-vectors)
+  (raise
+   (condition (make-vectors-are-of-different-length-condition)
+	      (make-who-condition who)
+	      (make-message-condition "invalid arguments, vectors are of different length")
+	      (make-irritants-condition (vector vector-of-vectors)))))
+
+;;; --------------------------------------------------------------------
+
+(define-condition-type &vector-is-empty
+    &assertion
+  make-vector-is-empty-condition
+  condition-vector-is-empty?)
+
+(define (raise-exception-vector-is-empty who obj)
+  (raise
+   (condition (make-vector-is-empty-condition)
+	      (make-who-condition who)
+	      (make-message-condition "invalid operand, expected non-empty vector")
+	      (make-irritants-condition (vector obj)))))
+
+;;; --------------------------------------------------------------------
+
+(define-condition-type &vectors-are-empty-or-of-different-length
+    &assertion
+  make-vectors-are-empty-or-of-different-length-condition
+  condition-vectors-are-empty-or-of-different-length?)
+
+(define (raise-exception-vectors-are-empty-or-of-different-length who vector-of-vectors)
+  (raise
+   (condition (make-vectors-are-empty-or-of-different-length-condition)
+	      (make-who-condition who)
+	      (make-message-condition "invalid arguments, vectors are empty or of different length")
+	      (make-irritants-condition (vector vector-of-vectors)))))
+
+
+;;;; predicates
+
+(define (list-of-vectors? objs)
+  ;;Return true if OBJS is a (possibly empty)  list of vectors; otherwise return false.  Notice that
+  ;;this function returns false if OBJS is not null or a proper list of pairs.
+  ;;
+  (or (null? objs)
+      (and (pair? objs)
+	   (vector? (car objs))
+	   (list-of-vectors? (cdr objs)))))
+
+(define (list-of-vectors-of-equal-length? vec*)
+  ;;Return true if VEC*  is a list of vectors of equal length;  otherwise return false.  Notice that
+  ;;this function returns false if VEC* is not null or a proper list of pairs.
+  ;;
+  (or (null? vec*)
+      (and (pair? vec*)
+	   (vector? (car vec*))
+	   (let loop ((len1 (vector-length (car vec*)))
+		      (vec* (cdr vec*)))
+	     (or (null? vec*)
+		 (and (pair? vec*)
+		      (vector? (car vec*))
+		      (= len1 (vector-length (car vec*)))
+		      (loop len1 (cdr vec*))))))))
+
+(case-define vectors-of-equal-length?
+  ;;Return true if  all the arguments are  vectors of equal length; otherwise  return false.  Notice
+  ;;that this function returns false if one of the arguments is not a vector.
+  ;;
+  ((vec1)
+   (vector? vec1))
+
+  ((vec1 vec2)
+   (and (vector? vec1)
+	(vector? vec2)
+	(= (vector-length vec1)
+	   (vector-length vec2))))
+
+  ((vec1 vec2 vec3)
+   (and (vector? vec1)
+	(vector? vec2)
+	(vector? vec3)
+	(= (vector-length vec1)
+	   (vector-length vec2)
+	   (vector-length vec3))))
+
+
+  ((vec1 vec2 vec3 . vec*)
+   (and (vector? vec1)
+	(vector? vec2)
+	(vector? vec3)
+	(= (vector-length vec1)
+	   (vector-length vec2)
+	   (vector-length vec3))
+	($vector-for-all/1 (lambda (knil vec)
+			     (= knil (vector-length vec)))
+			   (vector-length vec1)
+			   vec*)))
+  #| end of CASE-DEFINE |# )
+
+
+;;;; special exceptional-condition raisers
+
+(case-define assert-vectors-of-equal-length
+  ((who vec1 vec2)
+   (unless (vectors-of-equal-length? vec1 vec2)
+     (raise-exception-vectors-are-of-different-length who (vector vec1 vec2))))
+  ((who vec1 vec2 vec3)
+   (unless (vectors-of-equal-length? vec1 vec2 vec3)
+     (raise-exception-vectors-are-of-different-length who (vector vec1 vec2 vec3))))
+  ((who vec1 vec2 vec3 vec*)
+   (unless (list-of-vectors-of-equal-length? (cons* vec1 vec2 vec3 vec*))
+     (raise-exception-vectors-are-of-different-length who (cons* vec1 vec2 vec3 vec*)))))
+
+
+;;;; folding functions
+
+(define ($vector-fold-left/1 combine knil vec)
+  (let ((vec.len (vector-length vec)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	0)
+		 (i+1	1)
+		 (knil	knil))
+	(if (= i+1 vec.len)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine knil (vector-ref vec i))
+	  (loop i+1 (+ 1 i)
+		(combine knil (vector-ref vec i))))))))
+
+(define ($vector-fold-left/2 combine knil vec1 vec2)
+  (let ((vec.len (vector-length vec1)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	0)
+		 (i+1	1)
+		 (knil	knil))
+	(if (= i+1 vec.len)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine knil (vector-ref vec1 i) (vector-ref vec2 i))
+	  (loop i+1 (+ 1 i)
+		(combine knil (vector-ref vec1 i) (vector-ref vec2 i))))))))
+
+(define ($vector-fold-left/3 combine knil vec1 vec2 vec3)
+  (let ((vec.len (vector-length vec1)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	0)
+		 (i+1	1)
+		 (knil	knil))
+	(if (= i+1 vec.len)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i))
+	  (loop i+1 (+ 1 i)
+		(combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i))))))))
+
+(define ($vector-fold-left/list combine knil vec*)
+  (let ((vec.len (vector-length (car vec*))))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	0)
+		 (i+1	1)
+		 (knil	knil))
+	(if (= i+1 vec.len)
+	    ;;Last call to COMBINE is in tail position.
+	    (apply combine knil ($map/1 (lambda (vec)
+					  (vector-ref vec i))
+				  vec*))
+	  (loop i+1 (+ 1 i)
+		(apply combine knil ($map/1 (lambda (vec)
+					      (vector-ref vec i))
+				      vec*))))))))
+
+;;; --------------------------------------------------------------------
+
+(define ($vector-fold-right/1 combine knil vec)
+  (let ((vec.len (vector-length vec)))
+    (if (zero? vec.len)
+	knil
+      (let ((i.start (+ -1 vec.len)))
+	(let loop ((i		i.start)
+		   (i-1		(+ -1 i.start))
+		   (knil	knil))
+	  (if (zero? i-1)
+	      ;;Last call to COMBINE is in tail position.
+	      (combine knil (vector-ref vec i))
+	    (loop i-1 (+ -1 i)
+		  (combine knil (vector-ref vec i)))))))))
+
+(define ($vector-fold-right/2 combine knil vec1 vec2)
+  (let ((vec.len (vector-length vec1)))
+    (if (zero? vec.len)
+	knil
+      (let ((i.start (+ -1 vec.len)))
+	(let loop ((i		i.start)
+		   (i-1		(+ -1 i.start))
+		   (knil	knil))
+	  (if (zero? i-1)
+	      ;;Last call to COMBINE is in tail position.
+	      (combine knil (vector-ref vec1 i) (vector-ref vec2 i))
+	    (loop i-1 (+ -1 i)
+		  (combine knil (vector-ref vec1 i) (vector-ref vec2 i)))))))))
+
+(define ($vector-fold-right/3 combine knil vec1 vec2 vec3)
+  (let ((vec.len (vector-length vec1)))
+    (if (zero? vec.len)
+	knil
+      (let ((i.start (+ -1 vec.len)))
+	(let loop ((i		i.start)
+		   (i-1		(+ -1 i.start))
+		   (knil	knil))
+	  (if (zero? i-1)
+	      ;;Last call to COMBINE is in tail position.
+	      (combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i))
+	    (loop i-1 (+ -1 i)
+		  (combine knil (vector-ref vec1 i) (vector-ref vec2 i) (vector-ref vec3 i)))))))))
+
+(define ($vector-fold-right/list combine knil vec*)
+  (let ((vec.len (vector-length (car vec*))))
+    (if (zero? vec.len)
+	knil
+      (let ((i.start (+ -1 vec.len)))
+	(let loop ((i		i.start)
+		   (i-1		(+ -1 i.start))
+		   (knil	knil))
+	  (if (zero? i-1)
+	      ;;Last call to COMBINE is in tail position.
+	      (apply combine knil ($map/1 (lambda (vec)
+					    (vector-ref vec i))
+				    vec*))
+	    (loop i-1 (+ -1 i)
+		  (apply combine knil ($map/1 (lambda (vec)
+						(vector-ref vec i))
+					vec*)))))))))
+
+;;; --------------------------------------------------------------------
+
+(define-vector-folder vector-fold-left
+  $vector-fold-left/1
+  $vector-fold-left/2
+  $vector-fold-left/3
+  $vector-fold-left/list)
+
+(define-vector-folder vector-fold-right
+  $vector-fold-right/1
+  $vector-fold-right/2
+  $vector-fold-right/3
+  $vector-fold-right/list)
+
+
+;;;; vector-mapping functions
+
+(define ($vector-map/1 func vec.in)
+  (receive-and-return (vec.out)
+      (make-vector (vector-length vec.in))
+    ($vector-fold-left/1 (lambda (idx item)
+			   (vector-set! vec.out idx (func item))
+			   (add1 idx))
+      0 vec.in)))
+
+(define ($vector-map/2 func vec1 vec2)
+  (receive-and-return (vec.out)
+      (make-vector (vector-length vec1))
+    ($vector-fold-left/1 (lambda (idx item1 item2)
+			   (vector-set! vec.out idx (func item1 item2))
+			   (add1 idx))
+      0 vec1 vec2)))
+
+(define ($vector-map/3 func vec1 vec2 vec3)
+  (receive-and-return (vec.out)
+      (make-vector (vector-length vec1))
+    ($vector-fold-left/1 (lambda (idx item1 item2 item3)
+			   (vector-set! vec.out idx (func item1 item2 item2))
+			   (add1 idx))
+      0 vec1 vec2 vec3)))
+
+(define ($vector-map/list func vec*)
+  (receive-and-return (vec.out)
+      (make-vector (vector-length (car vec*)))
+    ($vector-fold-left/list (lambda (idx . item*)
+			      (vector-set! vec.out idx (apply func item*))
+			      (add1 idx))
+      0 vec*)))
+
+;;; --------------------------------------------------------------------
+
+(define ($vector-for-each/1 func vec)
+  ($vector-fold-left/1 (lambda (idx item)
+			 (func item)
+			 (add1 idx))
+    0 vec))
+
+(define ($vector-for-each/2 func vec1 vec2)
+  ($vector-fold-left/1 (lambda (idx item1 item2)
+			 (func item1 item2)
+			 (add1 idx))
+    0 vec1 vec2))
+
+(define ($vector-for-each/3 func vec1 vec2 vec3)
+  ($vector-fold-left/1 (lambda (idx item1 item2 item3)
+			 (func item1 item2 item3)
+			 (add1 idx))
+    0 vec1 vec2 vec3))
+
+(define ($vector-for-each/list func vec*)
+  ($vector-fold-left/list (lambda (idx . item*)
+			    (apply func item*)
+			    (add1 idx))
+    0 vec*))
+
+;;; --------------------------------------------------------------------
+
+(define $vector-map-in-order/1		$vector-map/1)
+(define $vector-map-in-order/2		$vector-map/2)
+(define $vector-map-in-order/3		$vector-map/3)
+(define $vector-map-in-order/list	$vector-map/list)
+
+;;; --------------------------------------------------------------------
+
+(define $vector-for-each-in-order/1	$vector-for-each/1)
+(define $vector-for-each-in-order/2	$vector-for-each/2)
+(define $vector-for-each-in-order/3	$vector-for-each/3)
+(define $vector-for-each-in-order/list	$vector-for-each/list)
+
+;;; --------------------------------------------------------------------
+
+(define-vector-mapper vector-map
+  $vector-map/1
+  $vector-map/2
+  $vector-map/3
+  $vector-map/list)
+
+(define-vector-mapper vector-for-each
+  $vector-for-each/1
+  $vector-for-each/2
+  $vector-for-each/3
+  $vector-for-each/list)
+
+(define-vector-mapper vector-map-in-order
+  $vector-map-in-order/1
+  $vector-map-in-order/2
+  $vector-map-in-order/3
+  $vector-map-in-order/list)
+
+(define-vector-mapper vector-for-each-in-order
+  $vector-for-each-in-order/1
+  $vector-for-each-in-order/2
+  $vector-for-each-in-order/3
+  $vector-for-each-in-order/list)
+
+
+;;;; search functions
+
+(define ($vector-for-all/1 pred vec)
+  (call/cc
+      (lambda (escape)
+	($vector-fold-left/1 (lambda (knil item)
+			       (if (pred item)
+				   knil
+				 (escape #f)))
+	  #t vec))))
+
+(define ($vector-for-all/2 pred vec1 vec2)
+  (call/cc
+      (lambda (escape)
+	($vector-fold-left/2 (lambda (knil item1 item2)
+			       (if (pred item1 item2)
+				   knil
+				 (escape #f)))
+	  #t vec1 vec2))))
+
+(define ($vector-for-all/3 pred vec1 vec2 vec3)
+  (call/cc
+      (lambda (escape)
+	($vector-fold-left/3 (lambda (knil item1 item2 item3)
+			       (if (pred item1 item2 item3)
+				   knil
+				 (escape #f)))
+	  #t vec1 vec2 vec3))))
+
+(define ($vector-for-all/list pred vec*)
+  (call/cc
+      (lambda (escape)
+	($vector-fold-left/list (lambda (knil . item*)
+				  (if (apply pred item*)
+				      knil
+				    (escape #f)))
+	  #t vec*))))
+
+;;; --------------------------------------------------------------------
+
+(define ($vector-exists/1 pred vec)
+  (call/cc
+      (lambda (escape)
+	($vector-fold-left/1 (lambda (knil item)
+			       (cond ((pred item)
+				      => escape)
+				     (else
+				      knil)))
+	  #f vec))))
+
+(define ($vector-exists/2 pred vec1 vec2)
+  (call/cc
+      (lambda (escape)
+	($vector-fold-left/2 (lambda (knil item1 item2)
+			       (cond ((pred item1 item2)
+				      => escape)
+				     (else
+				      knil)))
+	  #f vec1 vec2))))
+
+(define ($vector-exists/3 pred vec1 vec2 vec3)
+  (call/cc
+      (lambda (escape)
+	($vector-fold-left/3 (lambda (knil item1 item2 item3)
+			       (cond ((pred item1 item2 item3)
+				      => escape)
+				     (else
+				      knil)))
+	  #f vec1 vec2 vec3))))
+
+(define ($vector-exists/list pred vec*)
+  (call/cc
+      (lambda (escape)
+	($vector-fold-left/2 (lambda (knil . item*)
+			       (cond ((apply pred item*)
+				      => escape)
+				     (else
+				      knil)))
+	  #f vec*))))
+
+;;; --------------------------------------------------------------------
+
+(case-define $vector-find
+  ((pred vec)
+   ($vector-find pred vec #f))
+  ((pred vec default)
+   (call/cc
+       (lambda (escape)
+	 ($vector-fold-left/1 (lambda (knil item)
+				(if (pred item)
+				    (escape item)
+				  knil))
+	   default vec)))))
+
+;;; --------------------------------------------------------------------
+
+(case-define* vector-find
+  ((pred vec)
+   ($vector-find pred vec #f))
+  ((pred vec default)
+   (begin-checks
+     (assert-argument-type (__who__) "procedure" procedure? pred 1)
+     (assert-argument-type (__who__) "list"      vector?    vec  2))
+   ($vector-find pred vec default)))
+
+(define-vector-searcher vector-for-all
+  $vector-for-all/1
+  $vector-for-all/2
+  $vector-for-all/3
+  $vector-for-all/list)
+
+(define-vector-searcher vector-exists
+  $vector-exists/1
+  $vector-exists/2
+  $vector-exists/3
+  $vector-exists/list)
+
+
 ;;;; operations
 
 (define (vector-copy dst.vec dst.start src.vec src.start src.end)
-  (do ((i dst.start (fx+ 1 i))
-       (j src.start (fx+ 1 j)))
-      ((fx= j src.end))
+  (do ((i dst.start (+ 1 i))
+       (j src.start (+ 1 j)))
+      ((= j src.end))
     ($vector-set! dst.vec i ($vector-ref src.vec j))))
 
 (define (vector-append . vecs)
@@ -100,53 +761,31 @@
     (fold-left (lambda (dst.idx src.vec)
 		 (let ((src.len ($vector-length src.vec)))
 		   (vector-copy dst.vec dst.idx src.vec 0 src.len)
-		   (fx+ dst.idx src.len)))
+		   (+ dst.idx src.len)))
       0 vecs)))
 
 (case-define vector-map-to-list
   ((func vec)
-   (let loop ((i	(fx- ($vector-length vec) 1))
+   (let loop ((i	(- ($vector-length vec) 1))
 	      (result	'()))
-     (if (fx<= 0 i)
-	 (loop (fx- i 1) (cons (func ($vector-ref vec i)) result))
+     (if (<= 0 i)
+	 (loop (- i 1) (cons (func ($vector-ref vec i)) result))
        result)))
 
   ((func vec1 vec2)
-   (let loop ((i	(fx- ($vector-length vec1) 1))
+   (let loop ((i	(- ($vector-length vec1) 1))
 	      (result	'()))
      (if (<= 0 i)
-	 (loop (fx- i 1) (cons (func ($vector-ref vec1 i)
+	 (loop (- i 1) (cons (func ($vector-ref vec1 i)
 				     ($vector-ref vec2 i))
 			       result))
        result))))
 
-(case-define vector-for-each
-  ((func vec)
-   (do ((i 0 (fx+ 1 i)))
-       ((fx= i ($vector-length vec)))
-     (func i ($vector-ref vec i))))
-
-  ((func vec1 vec2)
-   (do ((i 0 (fx+ 1 i)))
-       ((fx= i ($vector-length vec1)))
-     (func i
-	   ($vector-ref vec1 i)
-	   ($vector-ref vec2 i)))))
-
-(define (vector-for-all pred vec)
-  (let loop ((i 0))
-    (cond ((fx= i ($vector-length vec))
-	   #t)
-	  ((pred ($vector-ref vec i))
-	   (loop (fx+ 1 i)))
-	  (else
-	   #f))))
-
 (define (vector-for-each-index func vec)
   (let loop ((idx 0))
-    (when (fx< idx ($vector-length vec))
+    (when (< idx ($vector-length vec))
       (func idx ($vector-ref vec idx))
-      (loop (fx+ 1 idx)))))
+      (loop (+ 1 idx)))))
 
 
 ;;;; done
