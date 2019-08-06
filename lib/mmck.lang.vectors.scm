@@ -692,11 +692,11 @@
 (define ($vector-exists/list pred vec*)
   (call/cc
       (lambda (escape)
-	($vector-fold-left/2 (lambda (knil . item*)
-			       (cond ((apply pred item*)
-				      => escape)
-				     (else
-				      knil)))
+	($vector-fold-left/list (lambda (knil . item*)
+				  (cond ((apply pred item*)
+					 => escape)
+					(else
+					 knil)))
 	  #f vec*))))
 
 ;;; --------------------------------------------------------------------

@@ -28,6 +28,8 @@
 (module (test-lang-vectors)
     ()
   (import (scheme)
+	  (only (chicken base)
+		void)
 	  (mmck lang)
 	  (mmck exceptional-conditions)
 	  (mmck checks))
@@ -511,6 +513,950 @@
     => '#((a d g l)
 	  (b e h m)
 	  (c f i n)))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-map))
+
+  (check
+      ($vector-map/1
+	  (lambda (item)
+	    (list item))
+	'#())
+    => '#())
+
+  (check
+      ($vector-map/1
+	  (lambda (item)
+	    (list item))
+	'#(a b c))
+    => '#((a) (b) (c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-map/2
+	  (lambda (item1 item2)
+	    (list item1 item2))
+	'#()
+	'#())
+    => '#())
+
+  (check
+      ($vector-map/2
+	  (lambda (item1 item2)
+	    (list item1 item2))
+	'#(a b c)
+	'#(d e f))
+    => '#((a d) (b e) (c f)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-map/3
+	  (lambda (item1 item2 item3)
+	    (list item1 item2 item3))
+	'#()
+	'#()
+	'#())
+    => '#())
+
+  (check
+      ($vector-map/3
+	  (lambda (item1 item2 item3)
+	    (list item1 item2 item3))
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '#((a d g) (b e h) (c f i)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-map/list
+	  (lambda (item1 item2 item3 item4)
+	    (list item1 item2 item3 item4))
+	'(#()
+	  #()
+	  #()
+	  #()))
+    => '#())
+
+  (check
+      ($vector-map/list
+	  (lambda (item1 item2 item3 item4)
+	    (list item1 item2 item3 item4))
+	'(#(a b c)
+	  #(d e f)
+	  #(g h i)
+	  #(l m n)))
+    => '#((a d g l)
+	  (b e h m)
+	  (c f i n)))
+
+  (values))
+
+
+(parameterise ((check-test-name		'for-each))
+
+  (check
+      (with-result
+	(vector-for-each
+	    (lambda (item)
+	      (add-result item))
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each
+	    (lambda (item)
+	      (add-result item))
+	  '#(a b c)))
+    => '(3 (a b c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each
+	    (lambda (item1 item2)
+	      (add-result (list item1 item2)))
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each
+	    (lambda (item1 item2)
+	      (add-result (list item1 item2)))
+	  '#(a b c)
+	  '#(d e f)))
+    => '(3 ((a d) (b e) (c f))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each
+	    (lambda (item1 item2 item3)
+	      (add-result (list item1 item2 item3)))
+	  '#()
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each
+	    (lambda (item1 item2 item3)
+	      (add-result (list item1 item2 item3)))
+	  '#(a b c)
+	  '#(d e f)
+	  '#(g h i)))
+    => '(3 ((a d g) (b e h) (c f i))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each
+	    (lambda (item1 item2 item3 item4)
+	      (add-result (list item1 item2 item3 item4)))
+	  '#()
+	  '#()
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each
+	    (lambda (item1 item2 item3 item4)
+	      (add-result (list item1 item2 item3 item4)))
+	  '#(a b c)
+	  '#(d e f)
+	  '#(g h i)
+	  '#(l m n)))
+    => '(3 ((a d g l)
+	    (b e h m)
+	    (c f i n))))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-for-each))
+
+  (check
+      (with-result
+	($vector-for-each/1
+	    (lambda (item)
+	      (add-result item))
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	($vector-for-each/1
+	    (lambda (item)
+	      (add-result item))
+	  '#(a b c)))
+    => '(3 (a b c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	($vector-for-each/2
+	    (lambda (item1 item2)
+	      (add-result (list item1 item2)))
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	($vector-for-each/2
+	    (lambda (item1 item2)
+	      (add-result (list item1 item2)))
+	  '#(a b c)
+	  '#(d e f)))
+    => '(3 ((a d) (b e) (c f))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	($vector-for-each/3
+	    (lambda (item1 item2 item3)
+	      (add-result (list item1 item2 item3)))
+	  '#()
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	($vector-for-each/3
+	    (lambda (item1 item2 item3)
+	      (add-result (list item1 item2 item3)))
+	  '#(a b c)
+	  '#(d e f)
+	  '#(g h i)))
+    => '(3 ((a d g) (b e h) (c f i))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	($vector-for-each/list
+	    (lambda (item1 item2 item3 item4)
+	      (add-result (list item1 item2 item3 item4)))
+	  '(#()
+	    #()
+	    #()
+	    #())))
+    => '(0 ()))
+
+  (check
+      (with-result
+	($vector-for-each/list
+	    (lambda (item1 item2 item3 item4)
+	      (add-result (list item1 item2 item3 item4)))
+	  '(#(a b c)
+	    #(d e f)
+	    #(g h i)
+	    #(l m n))))
+    => '(3 ((a d g l)
+	    (b e h m)
+	    (c f i n))))
+
+  (values))
+
+
+(parameterise ((check-test-name		'map-in-order))
+
+  (check
+      (vector-map-in-order
+	  (lambda (item)
+	    (list item))
+	'#())
+    => '#())
+
+  (check
+      (vector-map-in-order
+	  (lambda (item)
+	    (list item))
+	'#(a b c))
+    => '#((a) (b) (c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map-in-order
+	  (lambda (item1 item2)
+	    (list item1 item2))
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map-in-order
+	  (lambda (item1 item2)
+	    (list item1 item2))
+	'#(a b c)
+	'#(d e f))
+    => '#((a d) (b e) (c f)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map-in-order
+	  (lambda (item1 item2 item3)
+	    (list item1 item2 item3))
+	'#()
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map-in-order
+	  (lambda (item1 item2 item3)
+	    (list item1 item2 item3))
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '#((a d g) (b e h) (c f i)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map-in-order
+	  (lambda (item1 item2 item3 item4)
+	    (list item1 item2 item3 item4))
+	'#()
+	'#()
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map-in-order
+	  (lambda (item1 item2 item3 item4)
+	    (list item1 item2 item3 item4))
+	'#(a b c)
+	'#(d e f)
+	'#(g h i)
+	'#(l m n))
+    => '#((a d g l)
+	  (b e h m)
+	  (c f i n)))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-map-in-order))
+
+  (check
+      ($vector-map-in-order/1
+	  (lambda (item)
+	    (list item))
+	'#())
+    => '#())
+
+  (check
+      ($vector-map-in-order/1
+	  (lambda (item)
+	    (list item))
+	'#(a b c))
+    => '#((a) (b) (c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-map-in-order/2
+	  (lambda (item1 item2)
+	    (list item1 item2))
+	'#()
+	'#())
+    => '#())
+
+  (check
+      ($vector-map-in-order/2
+	  (lambda (item1 item2)
+	    (list item1 item2))
+	'#(a b c)
+	'#(d e f))
+    => '#((a d) (b e) (c f)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-map-in-order/3
+	  (lambda (item1 item2 item3)
+	    (list item1 item2 item3))
+	'#()
+	'#()
+	'#())
+    => '#())
+
+  (check
+      ($vector-map-in-order/3
+	  (lambda (item1 item2 item3)
+	    (list item1 item2 item3))
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '#((a d g) (b e h) (c f i)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-map-in-order/list
+	  (lambda (item1 item2 item3 item4)
+	    (list item1 item2 item3 item4))
+	'(#()
+	  #()
+	  #()
+	  #()))
+    => '#())
+
+  (check
+      ($vector-map-in-order/list
+	  (lambda (item1 item2 item3 item4)
+	    (list item1 item2 item3 item4))
+	'(#(a b c)
+	  #(d e f)
+	  #(g h i)
+	  #(l m n)))
+    => '#((a d g l)
+	  (b e h m)
+	  (c f i n)))
+
+  (values))
+
+
+(parameterise ((check-test-name		'for-each-in-order))
+
+  (check
+      (with-result
+	(vector-for-each-in-order
+	    (lambda (item)
+	      (add-result item))
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each-in-order
+	    (lambda (item)
+	      (add-result item))
+	  '#(a b c)))
+    => '(3 (a b c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each-in-order
+	    (lambda (item1 item2)
+	      (add-result (list item1 item2)))
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each-in-order
+	    (lambda (item1 item2)
+	      (add-result (list item1 item2)))
+	  '#(a b c)
+	  '#(d e f)))
+    => '(3 ((a d) (b e) (c f))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each-in-order
+	    (lambda (item1 item2 item3)
+	      (add-result (list item1 item2 item3)))
+	  '#()
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each-in-order
+	    (lambda (item1 item2 item3)
+	      (add-result (list item1 item2 item3)))
+	  '#(a b c)
+	  '#(d e f)
+	  '#(g h i)))
+    => '(3 ((a d g) (b e h) (c f i))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each-in-order
+	    (lambda (item1 item2 item3 item4)
+	      (add-result (list item1 item2 item3 item4)))
+	  '#()
+	  '#()
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each-in-order
+	    (lambda (item1 item2 item3 item4)
+	      (add-result (list item1 item2 item3 item4)))
+	  '#(a b c)
+	  '#(d e f)
+	  '#(g h i)
+	  '#(l m n)))
+    => '(3 ((a d g l)
+	    (b e h m)
+	    (c f i n))))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-for-each-in-order))
+
+  (check
+      (with-result
+	($vector-for-each-in-order/1
+	    (lambda (item)
+	      (add-result item))
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	($vector-for-each-in-order/1
+	    (lambda (item)
+	      (add-result item))
+	  '#(a b c)))
+    => '(3 (a b c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	($vector-for-each-in-order/2
+	    (lambda (item1 item2)
+	      (add-result (list item1 item2)))
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	($vector-for-each-in-order/2
+	    (lambda (item1 item2)
+	      (add-result (list item1 item2)))
+	  '#(a b c)
+	  '#(d e f)))
+    => '(3 ((a d) (b e) (c f))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	($vector-for-each-in-order/3
+	    (lambda (item1 item2 item3)
+	      (add-result (list item1 item2 item3)))
+	  '#()
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	($vector-for-each-in-order/3
+	    (lambda (item1 item2 item3)
+	      (add-result (list item1 item2 item3)))
+	  '#(a b c)
+	  '#(d e f)
+	  '#(g h i)))
+    => '(3 ((a d g) (b e h) (c f i))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	($vector-for-each-in-order/list
+	    (lambda (item1 item2 item3 item4)
+	      (add-result (list item1 item2 item3 item4)))
+	  '(#()
+	    #()
+	    #()
+	    #())))
+    => '(0 ()))
+
+  (check
+      (with-result
+	($vector-for-each-in-order/list
+	    (lambda (item1 item2 item3 item4)
+	      (add-result (list item1 item2 item3 item4)))
+	  '(#(a b c)
+	    #(d e f)
+	    #(g h i)
+	    #(l m n))))
+    => '(3 ((a d g l)
+	    (b e h m)
+	    (c f i n))))
+
+  (values))
+
+
+(parameterise ((check-test-name		'for-all))
+
+  (check
+      (vector-for-all (lambda (item)
+			(even? item))
+	'#())
+    => #t)
+
+  (check
+      (vector-for-all (lambda (item)
+			(number? item))
+	'#(1 3 5 6 8 10))
+    => #t)
+
+  (check
+      (vector-for-all (lambda (item)
+			(even? item))
+	'#(1 3 5 6 8 10))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-for-all (lambda (item1 item2)
+			(< 10 (+ item1 item2)))
+	'#()
+	'#())
+    => #t)
+
+  (check
+      (vector-for-all (lambda (item1 item2)
+			(< 1 (+ item1 item2)))
+	'#(1 3 5 7)
+	'#(2 4 6 8))
+    => #t)
+
+  (check
+      (vector-for-all (lambda (item1 item2)
+			(if (< 10 (+ item1 item2))
+			    (vector item1 item2)
+			  #f))
+	'#(1 2 3)
+	'#(4 5 6))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-for-all (lambda (item1 item2 item3)
+			(if (< 10 (+ item1 item2 item3))
+			    (vector item1 item2 item3)
+			  #f))
+	'#()
+	'#()
+	'#())
+    => #t)
+
+  (check
+      (vector-for-all (lambda (item1 item2 item3)
+			(if (< 1 (+ item1 item2 item3))
+			    (vector item1 item2 item3)
+			  #f))
+	'#(1 3 5 7)
+	'#(2 4 6 8)
+	'#(3 5 7 9))
+    => #t)
+
+  (check
+      (vector-for-all (lambda (item1 item2 item3)
+			(if (< 10 (+ item1 item2 item3))
+			    (vector item1 item2 item3)
+			  #f))
+	'#(1 2 3)
+	'#(1.1 2.2 3.3)
+	'#(1.11 2.22 3.33))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-for-all (lambda (item1 item2 item3 item4)
+			(if (< 10 (+ item1 item2 item3 item4))
+			    (vector item1 item2 item3 item4)
+			  #f))
+	'#()
+	'#()
+	'#()
+	'#())
+    => #t)
+
+  (check
+      (vector-for-all (lambda (item1 item2 item3 item4)
+			(if (< 3 (+ item1 item2 item3 item4))
+			    (vector item1 item2 item3 item4)
+			  #f))
+	'#(1 3 5 7)
+	'#(2 4 6 8)
+	'#(3 5 7 9)
+	'#(4 6 8 10))
+    => #t)
+
+  (check
+      (vector-for-all (lambda (item1 item2 item3 item4)
+			(if (< 100 (+ item1 item2 item3 item4))
+			    (vector item1 item2 item3 item4)
+			  #f))
+	'#(1 2 3)
+	'#(1.1 2.2 3.3)
+	'#(1.11 2.22 3.33)
+	'#(1.111 2.222 3.333))
+    => #f)
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-for-all))
+
+  (check
+      ($vector-for-all/1 (lambda (item)
+			   (even? item))
+	'#())
+    => #t)
+
+  (check
+      ($vector-for-all/1 (lambda (item)
+			   (number? item))
+	'#(1 3 5 6 8 10))
+    => #t)
+
+  (check
+      ($vector-for-all/1 (lambda (item)
+			   (even? item))
+	'#(1 3 5 6 8 10))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-for-all/2 (lambda (item1 item2)
+			   (< 10 (+ item1 item2)))
+	'#()
+	'#())
+    => #t)
+
+  (check
+      ($vector-for-all/2 (lambda (item1 item2)
+			   (< 1 (+ item1 item2)))
+	'#(1 3 5 7)
+	'#(2 4 6 8))
+    => #t)
+
+  (check
+      ($vector-for-all/2 (lambda (item1 item2)
+			   (if (< 10 (+ item1 item2))
+			       (vector item1 item2)
+			     #f))
+	'#(1 2 3)
+	'#(4 5 6))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-for-all/3 (lambda (item1 item2 item3)
+			   (if (< 10 (+ item1 item2 item3))
+			       (vector item1 item2 item3)
+			     #f))
+	'#()
+	'#()
+	'#())
+    => #t)
+
+  (check
+      ($vector-for-all/3 (lambda (item1 item2 item3)
+			   (if (< 1 (+ item1 item2 item3))
+			       (vector item1 item2 item3)
+			     #f))
+	'#(1 3 5 7)
+	'#(2 4 6 8)
+	'#(3 5 7 9))
+    => #t)
+
+  (check
+      ($vector-for-all/3 (lambda (item1 item2 item3)
+			   (if (< 10 (+ item1 item2 item3))
+			       (vector item1 item2 item3)
+			     #f))
+	'#(1 2 3)
+	'#(1.1 2.2 3.3)
+	'#(1.11 2.22 3.33))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-for-all/list (lambda (item1 item2 item3 item4)
+			      (if (< 10 (+ item1 item2 item3 item4))
+				  (vector item1 item2 item3 item4)
+				#f))
+	'(#()
+	  #()
+	  #()
+	  #()))
+    => #t)
+
+  (check
+      ($vector-for-all/list (lambda (item1 item2 item3 item4)
+			      (if (< 3 (+ item1 item2 item3 item4))
+				  (vector item1 item2 item3 item4)
+				#f))
+	'(#(1 3 5 7)
+	  #(2 4 6 8)
+	  #(3 5 7 9)
+	  #(4 6 8 10)))
+    => #t)
+
+  (check
+      ($vector-for-all/list (lambda (item1 item2 item3 item4)
+			      (if (< 100 (+ item1 item2 item3 item4))
+				  (vector item1 item2 item3 item4)
+				#f))
+	'(#(1 2 3)
+	  #(1.1 2.2 3.3)
+	  #(1.11 2.22 3.33)
+	  #(1.111 2.222 3.333)))
+    => #f)
+
+  (values))
+
+
+(parameterise ((check-test-name		'exists))
+
+  (check
+      (vector-exists (lambda (item)
+		(even? item))
+	'#())
+    => #f)
+
+  (check
+      (vector-exists (lambda (item)
+		(if (even? item)
+		    (vector item)
+		  #f))
+	'#(1 3 5 6 8 10))
+    => '#(6))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-exists (lambda (item1 item2)
+		(if (< 10 (+ item1 item2))
+		    (vector item1 item2)
+		  #f))
+	'#()
+	'#())
+    => #f)
+
+  (check
+      (vector-exists (lambda (item1 item2)
+		(if (< 10 (+ item1 item2))
+		    (vector item1 item2)
+		  #f))
+	'#(1 3 5 7)
+	'#(2 4 6 8))
+    => '#(5 6))
+
+  (check
+      (vector-exists (lambda (item1 item2)
+		(if (< 10 (+ item1 item2))
+		    (vector item1 item2)
+		  #f))
+	'#(1 2 3)
+	'#(4 5 6))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-exists (lambda (item1 item2 item3)
+		(if (< 10 (+ item1 item2 item3))
+		    (vector item1 item2 item3)
+		  #f))
+	'#()
+	'#()
+	'#())
+    => #f)
+
+  (check
+      (vector-exists (lambda (item1 item2 item3)
+		(if (< 10 (+ item1 item2 item3))
+		    (vector item1 item2 item3)
+		  #f))
+	'#(1 3 5 7)
+	'#(2 4 6 8)
+	'#(3 5 7 9))
+    => '#(3 4 5))
+
+  (check
+      (vector-exists (lambda (item1 item2 item3)
+		(if (< 10 (+ item1 item2 item3))
+		    (vector item1 item2 item3)
+		  #f))
+	'#(1 2 3)
+	'#(1.1 2.2 3.3)
+	'#(1.11 2.22 3.33))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-exists (lambda (item1 item2 item3 item4)
+		(if (< 10 (+ item1 item2 item3 item4))
+		    (vector item1 item2 item3 item4)
+		  #f))
+	'#()
+	'#()
+	'#()
+	'#())
+    => #f)
+
+  (check
+      (vector-exists (lambda (item1 item2 item3 item4)
+		(if (< 10 (+ item1 item2 item3 item4))
+		    (vector item1 item2 item3 item4)
+		  #f))
+	'#(1 3 5 7)
+	'#(2 4 6 8)
+	'#(3 5 7 9)
+	'#(4 6 8 10))
+    => '#(3 4 5 6))
+
+  (check
+      (vector-exists (lambda (item1 item2 item3 item4)
+		(if (< 100 (+ item1 item2 item3 item4))
+		    (vector item1 item2 item3 item4)
+		  #f))
+	'#(1 2 3)
+	'#(1.1 2.2 3.3)
+	'#(1.11 2.22 3.33)
+	'#(1.111 2.222 3.333))
+    => #f)
 
   (values))
 
