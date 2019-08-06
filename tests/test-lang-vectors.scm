@@ -80,14 +80,437 @@
   (values))
 
 
-(parameterise ((check-test-name		'left-fold))
+(parameterise ((check-test-name		'fold-left))
 
   (check
-      (vector-fold-left (lambda (knil item)
-			  (cons item knil))
-			'(0)
-			'#(a b c))
+      (vector-fold-left
+	  (lambda (knil item)
+	    (cons item knil))
+	123
+	'#())
+    => 123)
+
+  (check
+      (vector-fold-left
+	  (lambda (knil item)
+	    (cons item knil))
+	'(0)
+	'#(a b c))
     => '(c b a 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-fold-left
+	  (lambda (knil item1 item2)
+	    (cons (list item1 item2) knil))
+	123
+	'#()
+	'#())
+    => 123)
+
+  (check
+      (vector-fold-left
+	  (lambda (knil item1 item2)
+	    (cons (list item1 item2) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f))
+    => '((c f) (b e) (a d) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-fold-left
+	  (lambda (knil item1 item2 item3)
+	    (cons (list item1 item2 item3) knil))
+	123
+	'#()
+	'#()
+	'#())
+    => 123)
+
+  (check
+      (vector-fold-left
+	  (lambda (knil item1 item2 item3)
+	    (cons (list item1 item2 item3) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '((c f i) (b e h) (a d g) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-fold-left
+	  (lambda (knil item1 item2 item3 item4)
+	    (cons (list item1 item2 item3 item4) knil))
+	123
+	'#()
+	'#()
+	'#()
+	'#())
+    => 123)
+
+  (check
+      (vector-fold-left
+	  (lambda (knil item1 item2 item3 item4)
+	    (cons (list item1 item2 item3 item4) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f)
+	'#(g h i)
+	'#(l m n))
+    => '((c f i n) (b e h m) (a d g l) 0))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-fold-left))
+
+  (check
+      ($vector-fold-left/1
+	  (lambda (knil item)
+	    (cons item knil))
+	123
+	'#())
+    => 123)
+
+  (check
+      ($vector-fold-left/1
+	  (lambda (knil item)
+	    (cons item knil))
+	'(0)
+	'#(a b c))
+    => '(c b a 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-fold-left/2
+	  (lambda (knil item1 item2)
+	    (cons (list item1 item2) knil))
+	123
+	'#()
+	'#())
+    => 123)
+
+  (check
+      ($vector-fold-left/2
+	  (lambda (knil item1 item2)
+	    (cons (list item1 item2) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f))
+    => '((c f) (b e) (a d) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-fold-left/3
+	  (lambda (knil item1 item2 item3)
+	    (cons (list item1 item2 item3) knil))
+	123
+	'#()
+	'#()
+	'#())
+    => 123)
+
+  (check
+      ($vector-fold-left/3
+	  (lambda (knil item1 item2 item3)
+	    (cons (list item1 item2 item3) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '((c f i) (b e h) (a d g) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-fold-left/list
+	  (lambda (knil item1 item2 item3 item4)
+	    (cons (list item1 item2 item3 item4) knil))
+	123
+	'(#()
+	  #()
+	  #()
+	  #()))
+    => 123)
+
+  (check
+      ($vector-fold-left/list
+	  (lambda (knil item1 item2 item3 item4)
+	    (cons (list item1 item2 item3 item4) knil))
+	'(0)
+	'(#(a b c)
+	  #(d e f)
+	  #(g h i)
+	  #(l m n)))
+    => '((c f i n) (b e h m) (a d g l) 0))
+
+  (values))
+
+
+(parameterise ((check-test-name		'fold-right))
+
+  (check
+      (vector-fold-right
+	  (lambda (item knil)
+	    (cons item knil))
+	123
+	'#())
+    => 123)
+
+  (check
+      (vector-fold-right
+	  (lambda (item knil)
+	    (cons item knil))
+	'(0)
+	'#(a b c))
+    => '(a b c 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-fold-right
+	  (lambda (item1 item2 knil)
+	    (cons (list item1 item2) knil))
+	123
+	'#()
+	'#())
+    => 123)
+
+  (check
+      (vector-fold-right
+	  (lambda (item1 item2 knil)
+	    (cons (list item1 item2) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f))
+    => '((a d) (b e) (c f) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-fold-right
+	  (lambda (item1 item2 item3 knil)
+	    (cons (list item1 item2 item3) knil))
+	123
+	'#()
+	'#()
+	'#())
+    => 123)
+
+  (check
+      (vector-fold-right
+	  (lambda (item1 item2 item3 knil)
+	    (cons (list item1 item2 item3) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '((a d g) (b e h) (c f i) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-fold-right
+	  (lambda (item1 item2 item3 item4 knil)
+	    (cons (list item1 item2 item3 item4) knil))
+	123
+	'#()
+	'#()
+	'#()
+	'#())
+    => 123)
+
+  (check
+      (vector-fold-right
+	  (lambda (item1 item2 item3 item4 knil)
+	    (cons (list item1 item2 item3 item4) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f)
+	'#(g h i)
+	'#(l m n))
+    => '((a d g l)
+	 (b e h m)
+	 (c f i n)
+	 0))
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-fold-right))
+
+  (check
+      ($vector-fold-right/1
+	  (lambda (item knil)
+	    (cons item knil))
+	123
+	'#())
+    => 123)
+
+  (check
+      ($vector-fold-right/1
+	  (lambda (item knil)
+	    (cons item knil))
+	'(0)
+	'#(a b c))
+    => '(a b c 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-fold-right/2
+	  (lambda (item1 item2 knil)
+	    (cons (list item1 item2) knil))
+	123
+	'#()
+	'#())
+    => 123)
+
+  (check
+      ($vector-fold-right/2
+	  (lambda (item1 item2 knil)
+	    (cons (list item1 item2) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f))
+    => '((a d) (b e) (c f) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-fold-right/3
+	  (lambda (item1 item2 item3 knil)
+	    (cons (list item1 item2 item3) knil))
+	123
+	'#()
+	'#()
+	'#())
+    => 123)
+
+  (check
+      ($vector-fold-right/3
+	  (lambda (item1 item2 item3 knil)
+	    (cons (list item1 item2 item3) knil))
+	'(0)
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '((a d g) (b e h) (c f i) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-fold-right/list
+	  (lambda (item1 item2 item3 item4 knil)
+	    (cons (list item1 item2 item3 item4) knil))
+	123
+	'(#()
+	  #()
+	  #()
+	  #()))
+    => 123)
+
+  (check
+      ($vector-fold-right/list
+	  (lambda (item1 item2 item3 item4 knil)
+	    (cons (list item1 item2 item3 item4) knil))
+	'(0)
+	'(#(a b c)
+	  #(d e f)
+	  #(g h i)
+	  #(l m n)))
+    => '((a d g l)
+	 (b e h m)
+	 (c f i n)
+	 0))
+
+  (values))
+
+
+(parameterise ((check-test-name		'map))
+
+  (check
+      (vector-map
+	  (lambda (item)
+	    (list item))
+	'#())
+    => '#())
+
+  (check
+      (vector-map
+	  (lambda (item)
+	    (list item))
+	'#(a b c))
+    => '#((a) (b) (c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map
+	  (lambda (item1 item2)
+	    (list item1 item2))
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map
+	  (lambda (item1 item2)
+	    (list item1 item2))
+	'#(a b c)
+	'#(d e f))
+    => '#((a d) (b e) (c f)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map
+	  (lambda (item1 item2 item3)
+	    (list item1 item2 item3))
+	'#()
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map
+	  (lambda (item1 item2 item3)
+	    (list item1 item2 item3))
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '#((a d g) (b e h) (c f i)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map
+	  (lambda (item1 item2 item3 item4)
+	    (list item1 item2 item3 item4))
+	'#()
+	'#()
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map
+	  (lambda (item1 item2 item3 item4)
+	    (list item1 item2 item3 item4))
+	'#(a b c)
+	'#(d e f)
+	'#(g h i)
+	'#(l m n))
+    => '#((a d g l)
+	  (b e h m)
+	  (c f i n)))
 
   (values))
 
