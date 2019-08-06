@@ -1461,6 +1461,163 @@
   (values))
 
 
+(parameterise ((check-test-name		'unsafe-exists))
+
+  (check
+      ($vector-exists/1 (lambda (item)
+			  (even? item))
+	'#())
+    => #f)
+
+  (check
+      ($vector-exists/1 (lambda (item)
+			  (if (even? item)
+			      (vector item)
+			    #f))
+	'#(1 3 5 6 8 10))
+    => '#(6))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-exists/2 (lambda (item1 item2)
+			  (if (< 10 (+ item1 item2))
+			      (vector item1 item2)
+			    #f))
+	'#()
+	'#())
+    => #f)
+
+  (check
+      ($vector-exists/2 (lambda (item1 item2)
+			  (if (< 10 (+ item1 item2))
+			      (vector item1 item2)
+			    #f))
+	'#(1 3 5 7)
+	'#(2 4 6 8))
+    => '#(5 6))
+
+  (check
+      ($vector-exists/2 (lambda (item1 item2)
+			  (if (< 10 (+ item1 item2))
+			      (vector item1 item2)
+			    #f))
+	'#(1 2 3)
+	'#(4 5 6))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-exists/3 (lambda (item1 item2 item3)
+			  (if (< 10 (+ item1 item2 item3))
+			      (vector item1 item2 item3)
+			    #f))
+	'#()
+	'#()
+	'#())
+    => #f)
+
+  (check
+      ($vector-exists/3 (lambda (item1 item2 item3)
+			  (if (< 10 (+ item1 item2 item3))
+			      (vector item1 item2 item3)
+			    #f))
+	'#(1 3 5 7)
+	'#(2 4 6 8)
+	'#(3 5 7 9))
+    => '#(3 4 5))
+
+  (check
+      ($vector-exists/3 (lambda (item1 item2 item3)
+			  (if (< 10 (+ item1 item2 item3))
+			      (vector item1 item2 item3)
+			    #f))
+	'#(1 2 3)
+	'#(1.1 2.2 3.3)
+	'#(1.11 2.22 3.33))
+    => #f)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      ($vector-exists/list (lambda (item1 item2 item3 item4)
+			     (if (< 10 (+ item1 item2 item3 item4))
+				 (vector item1 item2 item3 item4)
+			       #f))
+	'(#()
+	  #()
+	  #()
+	  #()))
+    => #f)
+
+  (check
+      ($vector-exists/list (lambda (item1 item2 item3 item4)
+			     (if (< 10 (+ item1 item2 item3 item4))
+				 (vector item1 item2 item3 item4)
+			       #f))
+	'(#(1 3 5 7)
+	  #(2 4 6 8)
+	  #(3 5 7 9)
+	  #(4 6 8 10)))
+    => '#(3 4 5 6))
+
+  (check
+      ($vector-exists/list (lambda (item1 item2 item3 item4)
+			     (if (< 100 (+ item1 item2 item3 item4))
+				 (vector item1 item2 item3 item4)
+			       #f))
+	'(#(1 2 3)
+	  #(1.1 2.2 3.3)
+	  #(1.11 2.22 3.33)
+	  #(1.111 2.222 3.333)))
+    => #f)
+
+  (values))
+
+
+(parameterise ((check-test-name		'find))
+
+  (check
+      (vector-find even? '#())
+    => #f)
+
+  (check
+      (vector-find even? '#(1))
+    => #f)
+
+  (check
+      (vector-find even? '#(2))
+    => 2)
+
+  (check
+      (vector-find even? '#(1 2 3))
+    => 2)
+
+  (values))
+
+
+(parameterise ((check-test-name		'unsafe-find))
+
+  (check
+      ($vector-find even? '#())
+    => #f)
+
+  (check
+      ($vector-find even? '#(1))
+    => #f)
+
+  (check
+      ($vector-find even? '#(2))
+    => 2)
+
+  (check
+      ($vector-find even? '#(1 2 3))
+    => 2)
+
+  (values))
+
+
 ;;;; done
 
 (check-report)
