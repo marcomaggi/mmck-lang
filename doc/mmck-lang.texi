@@ -1544,32 +1544,20 @@ is always called in the same dynamic environment as @func{find} itself.
 
 
 @defun for-all @var{proc} @vari{list} @varii{list} @dots{} @varn{list}
-@defunx exists @var{proc} @vari{list} @varii{list} @dots{} @varn{list}
 The @var{list}s must all have the same length, and @var{proc} must accept @math{n} arguments and
 return a single value.  @var{proc} must not mutate the @var{list} arguments.
 
 For natural numbers @math{i = 0, 1, @dots{}}, the @func{for-all} procedure successively applies
 @var{proc} to arguments @math{x_i^1 @dots{} x_i^n}, where @math{x_i^j} is the @math{i}-th element of
-@var{listj}, until @false{} is returned.
+@varj{list}, until @false{} is returned.
 
-If @var{proc} returns true values for all but the last element of @vari{list}, @func{for-all}
-performs a tail call of @var{proc} on the @math{k}-th elements, where @math{k} is the length of
-@vari{list}.  If @var{proc} returns @false{} on any set of elements, @func{for-all} returns @false{}
-after the first such application of @var{proc}.  If the @var{list}s are all empty, @func{for-all}
-returns @true{}.
+If @var{proc} returns true values for all but the last element of the @var{list} arguments:
+@func{for-all} performs a tail call of @var{proc} on the elements @math{k-1}, where @math{k} is the
+length of the lists.  If @var{proc} returns @false{} on any set of elements: @func{for-all} returns
+@false{} after the first such application of @var{proc}.  If the @var{list}s are all empty,
+@func{for-all} returns @true{}.
 
-For natural numbers @math{i = 0, 1, @dots{}}, the @func{exists} procedure applies @var{proc}
-successively to arguments @math{x_i^1 @dots{} x_i^n}, where @math{x_i^j} is the @math{i}-th element
-of @var{listj}, until a true value is returned.
-
-If @var{proc} returns @false{} for all but the last elements of the @var{list}s, @func{exists}
-performs a tail call of @var{proc} on the @emph{k}th elements, where @emph{k} is the length of
-@vari{list}.  If @var{proc} returns a true value on any set of elements, @func{exists} returns that
-value after the first such application of @var{proc}.  If the @var{list}s are all empty,
-@func{exists} returns @false{}.
-
-@var{proc} is always called in the same dynamic environment as @func{for-all} or, respectively,
-@func{exists} itself.
+@var{proc} is always called in the same dynamic environment as @func{for-all} itself.
 
 @lisp
 (for-all even? '(3 1 4 1 5 9))
@@ -1594,6 +1582,28 @@ value after the first such application of @var{proc}.  If the @var{list}s are al
 (for-all < '(1 2 4) '(2 3 4))
 @result{} #f
 
+@end lisp
+@end defun
+
+
+@defun exists @var{proc} @vari{list} @varii{list} @dots{} @varn{list}
+The @var{list}s must all have the same length, and @var{proc} must accept @math{n} arguments and
+return a single value.  @var{proc} must not mutate the @var{list} arguments.
+
+For natural numbers @math{i = 0, 1, @dots{}}, the @func{exists} procedure applies @var{proc}
+successively to arguments @math{x_i^1 @dots{} x_i^n}, where @math{x_i^j} is the @math{i}-th element
+of @var{listj}, until a true value is returned.
+
+If @var{proc} returns @false{} for all but the last elements of the @var{list} arguments:
+@func{exists} performs a tail call of @var{proc} on the elements @math{k-1} elements, where @math{k}
+is the length of the lists.  If @var{proc} returns a true value on any set of elements,
+@func{exists} returns that value after the first such application of @var{proc}.  If the @var{list}s
+are all empty, @func{exists} returns @false{}.
+
+@var{proc} is always called in the same dynamic environment as @func{for-all} or, respectively,
+@func{exists} itself.
+
+@lisp
 (exists even? '(3 1 4 1 5 9))
 @result{} #t
 
