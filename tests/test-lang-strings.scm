@@ -27,7 +27,11 @@
 
 (module (test-lang-strings)
     ()
-  (import (scheme)
+  (import (except (scheme)
+		  string-copy)
+	  (only (chicken base)
+		add1
+		void)
 	  (mmck lang)
 	  (mmck exceptional-conditions)
 	  (mmck checks))
@@ -46,6 +50,214 @@
 		;; ($string-ref str 2)
 		))
     => 3)
+
+  (values))
+
+
+(parameterise ((check-test-name		'predicates))
+
+  (check-for-true	(list-of-strings? '()))
+  (check-for-true	(list-of-strings? '("a")))
+  (check-for-true	(list-of-strings? '("a" "b")))
+  ;;
+  (check-for-false	(list-of-strings? ""))
+  (check-for-false	(list-of-strings? '("a" 123)))
+  (check-for-false	(list-of-strings? 123))
+
+;;; --------------------------------------------------------------------
+
+  (check-for-true	(list-of-strings-of-equal-length? '()))
+  (check-for-true	(list-of-strings-of-equal-length? '("a")))
+  (check-for-true	(list-of-strings-of-equal-length? '("a" "b")))
+
+  (check-for-false	(list-of-strings-of-equal-length? '("a" (b))))
+  (check-for-false	(list-of-strings-of-equal-length? '("a" "ab")))
+
+;;; --------------------------------------------------------------------
+
+  (check-for-true	(strings-of-equal-length? ""))
+  (check-for-true	(strings-of-equal-length? '"a"))
+  (check-for-true	(strings-of-equal-length? '"a" '"b"))
+
+  (check-for-false	(strings-of-equal-length? '"a" '(b)))
+  (check-for-false	(strings-of-equal-length? '"a" '"ab"))
+
+  (values))
+
+
+(parameterise ((check-test-name		'fold-left))
+
+  (check
+      (string-fold-left
+	  (lambda (knil item)
+	    (cons item knil))
+	123
+	"")
+    => 123)
+
+  (check
+      (string-fold-left
+	  (lambda (knil item)
+	    (cons item knil))
+	'(0)
+	"abc")
+    => '(#\c #\b #\a 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (string-fold-left
+	  (lambda (knil item1 item2)
+	    (cons (list item1 item2) knil))
+	123
+	""
+	"")
+    => 123)
+
+  (check
+      (string-fold-left
+	  (lambda (knil item1 item2)
+	    (cons (list item1 item2) knil))
+	'(0)
+	"abc"
+	"def")
+    => '((#\c #\f) (#\b #\e) (#\a #\d) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (string-fold-left
+	  (lambda (knil item1 item2 item3)
+	    (cons (list item1 item2 item3) knil))
+	123
+	""
+	""
+	"")
+    => 123)
+
+  (check
+      (string-fold-left
+	  (lambda (knil item1 item2 item3)
+	    (cons (list item1 item2 item3) knil))
+	'(0)
+	"abc"
+	"def"
+	"ghi")
+    => '((#\c #\f #\i) (#\b #\e #\h) (#\a #\d #\g) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (string-fold-left
+	  (lambda (knil item1 item2 item3 item4)
+	    (cons (list item1 item2 item3 item4) knil))
+	123
+	""
+	""
+	""
+	"")
+    => 123)
+
+  (check
+      (string-fold-left
+	  (lambda (knil item1 item2 item3 item4)
+	    (cons (list item1 item2 item3 item4) knil))
+	'(0)
+	"abc"
+	"def"
+	"ghi"
+	"lmn")
+    => '((#\c #\f #\i #\n) (#\b #\e #\h #\m) (#\a #\d #\g #\l) 0))
+
+  (values))
+
+
+(parameterise ((check-test-name		'fold-right))
+
+  (check
+      (string-fold-right
+	  (lambda (item knil)
+	    (cons item knil))
+	123
+	"")
+    => 123)
+
+  (check
+      (string-fold-right
+	  (lambda (item knil)
+	    (cons item knil))
+	'(0)
+	"abc")
+    => '(#\a #\b #\c 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (string-fold-right
+	  (lambda (item1 item2 knil)
+	    (cons (list item1 item2) knil))
+	123
+	""
+	"")
+    => 123)
+
+  (check
+      (string-fold-right
+	  (lambda (item1 item2 knil)
+	    (cons (list item1 item2) knil))
+	'(0)
+	"abc"
+	"def")
+    => '((#\a #\d) (#\b #\e) (#\c #\f) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (string-fold-right
+	  (lambda (item1 item2 item3 knil)
+	    (cons (list item1 item2 item3) knil))
+	123
+	""
+	""
+	"")
+    => 123)
+
+  (check
+      (string-fold-right
+	  (lambda (item1 item2 item3 knil)
+	    (cons (list item1 item2 item3) knil))
+	'(0)
+	"abc"
+	"def"
+	"ghi")
+    => '((#\a #\d #\g) (#\b #\e #\h) (#\c #\f #\i) 0))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (string-fold-right
+	  (lambda (item1 item2 item3 item4 knil)
+	    (cons (list item1 item2 item3 item4) knil))
+	123
+	""
+	""
+	""
+	"")
+    => 123)
+
+  (check
+      (string-fold-right
+	  (lambda (item1 item2 item3 item4 knil)
+	    (cons (list item1 item2 item3 item4) knil))
+	'(0)
+	"abc"
+	"def"
+	"ghi"
+	"lmn")
+    => '((#\a #\d #\g #\l)
+	 (#\b #\e #\h #\m)
+	 (#\c #\f #\i #\n)
+	 0))
 
   (values))
 

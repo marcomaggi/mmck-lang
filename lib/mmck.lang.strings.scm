@@ -29,17 +29,125 @@
 	 (uses mmck.lang.debug)
 	 (uses mmck.lang.core)
 	 (uses mmck.lang.assertions)
+	 (uses mmck.lang.lists)
 	 (emit-import-library mmck.lang.strings))
 
 (module (mmck.lang.strings)
     (
      ;; unsafe operations
      (syntax: $string-length)
+
+     ;; constructors
+
+     ;; predicates
+     string-empty?
+     string-not-empty?
+     list-of-strings?
+     strings-of-equal-length?
+     list-of-strings-of-equal-length?
+
+     ;; iteration and searching
+     string-fold-left string-fold-right
+     string-find string-exists string-for-all
+     string-map string-for-each
+     string-map-in-order string-for-each-in-order
+     string-map-index string-for-each-index
+
+     ;; unsafe iteration and searching
+     $string-fold-left/1
+     $string-fold-left/2
+     $string-fold-left/3
+     $string-fold-left/list
+     ;;
+     $string-fold-right/1
+     $string-fold-right/2
+     $string-fold-right/3
+     $string-fold-right/list
+     ;;
+     $string-map/1
+     $string-map/2
+     $string-map/3
+     $string-map/list
+     ;;
+     $string-for-each/1
+     $string-for-each/2
+     $string-for-each/3
+     $string-for-each/list
+     ;;
+     $string-map-in-order/1
+     $string-map-in-order/2
+     $string-map-in-order/3
+     $string-map-in-order/list
+     ;;
+     $string-for-each-in-order/1
+     $string-for-each-in-order/2
+     $string-for-each-in-order/3
+     $string-for-each-in-order/list
+     ;;
+     $string-map-index/1
+     $string-map-index/2
+     $string-map-index/3
+     $string-map-index/list
+     ;;
+     $string-for-each-index/1
+     $string-for-each-index/2
+     $string-for-each-index/3
+     $string-for-each-index/list
+     ;;
+     $string-for-all/1
+     $string-for-all/2
+     $string-for-all/3
+     $string-for-all/list
+     ;;
+     $string-exists/1
+     $string-exists/2
+     $string-exists/3
+     $string-exists/list
+     ;;
+     $string-find
+
+     ;; copying
+     string-copy
+     $string-copy
+
+     ;; miscellaneous
+     sorted-string-binary-search
+
+     ;; exceptional-condition object-types
+     &string-is-empty
+     make-string-is-empty-condition
+     condition-string-is-empty?
+     raise-exception-string-is-empty
+     ;;
+     &strings-are-of-different-length
+     make-strings-are-of-different-length-condition
+     condition-strings-are-of-different-length?
+     raise-exception-strings-are-of-different-length
+     ;;
+     &strings-are-empty-or-of-different-length
+     make-strings-are-empty-or-of-different-length-condition
+     condition-strings-are-empty-or-of-different-length?
+     raise-exception-strings-are-empty-or-of-different-length
      )
-  (import (scheme)
+  (import (except (scheme)
+		  string-copy)
+	  (only (chicken base)
+		add1
+		sub1
+		call/cc
+		fixnum?
+		void
+		when)
+	  (only (chicken fixnum)
+		fxshr)
 	  (mmck lang debug)
 	  (mmck lang core)
-	  (mmck lang assertions))
+	  (mmck lang assertions)
+	  (only (mmck lang lists)
+		cons*
+		$fold-left/1
+		$map/1)
+	  (mmck exceptional-conditions))
 
 
 ;;;; unsafe operations
@@ -49,6 +157,740 @@
   ;;object.
   ;;
   (##sys#size ?string))
+
+
+;;;; helpers
+
+(define-syntax define-string-folder
+  (syntax-rules ()
+    ((_ ?who ?string-folder/1 ?string-folder/2 ?string-folder/3 ?string-folder/list)
+     (case-define ?who
+       ((combine nil vec)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec     2))
+	(?string-folder/1 combine nil vec))
+
+       ((combine nil vec1 vec2)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1    2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2    3)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2))
+	(?string-folder/2 combine nil vec1 vec2))
+
+       ((combine nil vec1 vec2 vec3)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1    2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2    3)
+	  (assert-argument-type (quote ?who) "string"      string?      vec3    4)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3))
+	(?string-folder/3 combine nil vec1 vec2 vec3))
+
+       ((combine nil vec1 vec2 vec3 . vec*)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1    2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2    3)
+	  (assert-argument-type (quote ?who) "string"      string?      vec3    4)
+	  (assert-argument-type/rest (quote ?who) "string of strings" list-of-strings? vec*)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
+	(?string-folder/list combine nil (cons* vec1 vec2 vec3 vec*)))))
+    ))
+
+(define-syntax define-string-mapper
+  (syntax-rules ()
+    ((_ ?who ?string-mapper/1 ?string-mapper/2 ?string-mapper/3 ?string-mapper/list)
+     (case-define ?who
+       ((func vec)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec  2))
+	(?string-mapper/1 func vec))
+
+       ((func vec1 vec2)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2))
+	(?string-mapper/2 func vec1 vec2))
+
+       ((func vec1 vec2 vec3)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
+	  (assert-argument-type (quote ?who) "string"      string?      vec3 4)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3))
+	(?string-mapper/3 func vec1 vec2 vec3))
+
+       ((func vec1 vec2 vec3 . vec*)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
+	  (assert-argument-type (quote ?who) "string"      string?      vec3 4)
+	  (assert-argument-type/rest (quote ?who) "string of strings" list-of-strings? vec*)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
+	(?string-mapper/list func (cons* vec1 vec2 vec3 vec*)))))
+    ))
+
+(define-syntax define-string-searcher
+  (syntax-rules ()
+    ((_ ?who ?string-searcher/1 ?string-searcher/2 ?string-searcher/3 ?string-searcher/list)
+     (case-define ?who
+       ((pred vec)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec  2))
+	(?string-searcher/1 pred vec))
+
+       ((pred vec1 vec2)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2))
+	(?string-searcher/2 pred vec1 vec2))
+
+       ((pred vec1 vec2 vec3)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
+	  (assert-argument-type (quote ?who) "string"      string?      vec3 4)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3))
+	(?string-searcher/3 pred vec1 vec2 vec3))
+
+       ((pred vec1 vec2 vec3 . vec*)
+	(begin-checks
+	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
+	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
+	  (assert-argument-type (quote ?who) "string"      string?      vec3 4)
+	  (assert-argument-type/rest (quote ?who) "string of strings" list-of-strings? vec*)
+	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
+	(?string-searcher/list pred (cons* vec1 vec2 vec3 vec*)))))
+    ))
+
+
+;;;; exceptional-condition object-types
+
+(define-condition-type &strings-are-of-different-length
+    &assertion
+  make-strings-are-of-different-length-condition
+  condition-strings-are-of-different-length?)
+
+(define (raise-exception-strings-are-of-different-length who string-of-strings)
+  (raise
+   (condition (make-strings-are-of-different-length-condition)
+	      (make-who-condition who)
+	      (make-message-condition "invalid arguments, strings are of different length")
+	      (make-irritants-condition (string string-of-strings)))))
+
+;;; --------------------------------------------------------------------
+
+(define-condition-type &string-is-empty
+    &assertion
+  make-string-is-empty-condition
+  condition-string-is-empty?)
+
+(define (raise-exception-string-is-empty who obj)
+  (raise
+   (condition (make-string-is-empty-condition)
+	      (make-who-condition who)
+	      (make-message-condition "invalid operand, expected non-empty string")
+	      (make-irritants-condition (string obj)))))
+
+;;; --------------------------------------------------------------------
+
+(define-condition-type &strings-are-empty-or-of-different-length
+    &assertion
+  make-strings-are-empty-or-of-different-length-condition
+  condition-strings-are-empty-or-of-different-length?)
+
+(define (raise-exception-strings-are-empty-or-of-different-length who string-of-strings)
+  (raise
+   (condition (make-strings-are-empty-or-of-different-length-condition)
+	      (make-who-condition who)
+	      (make-message-condition "invalid arguments, strings are empty or of different length")
+	      (make-irritants-condition (string string-of-strings)))))
+
+
+;;;; constructors
+
+
+
+;;;; predicates
+
+(define (string-empty? obj)
+  (and (string? obj)
+       (zero? (string-length obj))))
+
+(define (string-not-empty? obj)
+  (and (string? obj)
+       (positive? (string-length obj))))
+
+(define (list-of-strings? objs)
+  ;;Return true if OBJS is a (possibly empty)  list of strings; otherwise return false.  Notice that
+  ;;this function returns false if OBJS is not null or a proper list of pairs.
+  ;;
+  (or (null? objs)
+      (and (pair? objs)
+	   (string? (car objs))
+	   (list-of-strings? (cdr objs)))))
+
+(define (list-of-strings-of-equal-length? vec*)
+  ;;Return true if VEC*  is a list of strings of equal length;  otherwise return false.  Notice that
+  ;;this function returns false if VEC* is not null or a proper list of pairs.
+  ;;
+  (or (null? vec*)
+      (and (pair? vec*)
+	   (string? (car vec*))
+	   (let loop ((len1 (string-length (car vec*)))
+		      (vec* (cdr vec*)))
+	     (or (null? vec*)
+		 (and (pair? vec*)
+		      (string? (car vec*))
+		      (= len1 (string-length (car vec*)))
+		      (loop len1 (cdr vec*))))))))
+
+(case-define strings-of-equal-length?
+  ;;Return true if  all the arguments are  strings of equal length; otherwise  return false.  Notice
+  ;;that this function returns false if one of the arguments is not a string.
+  ;;
+  ((vec1)
+   (string? vec1))
+
+  ((vec1 vec2)
+   (and (string? vec1)
+	(string? vec2)
+	(= (string-length vec1)
+	   (string-length vec2))))
+
+  ((vec1 vec2 vec3)
+   (and (string? vec1)
+	(string? vec2)
+	(string? vec3)
+	(= (string-length vec1)
+	   (string-length vec2)
+	   (string-length vec3))))
+
+
+  ((vec1 vec2 vec3 . vec*)
+   (and (string? vec1)
+	(string? vec2)
+	(string? vec3)
+	(= (string-length vec1)
+	   (string-length vec2)
+	   (string-length vec3))
+	($string-for-all/1 (lambda (knil vec)
+			     (= knil (string-length vec)))
+			   (string-length vec1)
+			   vec*)))
+  #| end of CASE-DEFINE |# )
+
+
+;;;; special exceptional-condition raisers
+
+(case-define assert-strings-of-equal-length
+  ((who vec1 vec2)
+   (unless (strings-of-equal-length? vec1 vec2)
+     (raise-exception-strings-are-of-different-length who (string vec1 vec2))))
+  ((who vec1 vec2 vec3)
+   (unless (strings-of-equal-length? vec1 vec2 vec3)
+     (raise-exception-strings-are-of-different-length who (string vec1 vec2 vec3))))
+  ((who vec1 vec2 vec3 vec*)
+   (unless (list-of-strings-of-equal-length? (cons* vec1 vec2 vec3 vec*))
+     (raise-exception-strings-are-of-different-length who (cons* vec1 vec2 vec3 vec*)))))
+
+
+;;;; folding functions
+
+(define ($string-fold-left/1 combine knil vec)
+  (let ((vec.len (string-length vec)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	0)
+		 (i+1	1)
+		 (knil	knil))
+	(if (= i+1 vec.len)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine knil (string-ref vec i))
+	  (loop i+1 (+ 1 i+1)
+		(combine knil (string-ref vec i))))))))
+
+(define ($string-fold-left/2 combine knil vec1 vec2)
+  (let ((vec.len (string-length vec1)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	0)
+		 (i+1	1)
+		 (knil	knil))
+	(if (= i+1 vec.len)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine knil (string-ref vec1 i) (string-ref vec2 i))
+	  (loop i+1 (+ 1 i+1)
+		(combine knil (string-ref vec1 i) (string-ref vec2 i))))))))
+
+(define ($string-fold-left/3 combine knil vec1 vec2 vec3)
+  (let ((vec.len (string-length vec1)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	0)
+		 (i+1	1)
+		 (knil	knil))
+	(if (= i+1 vec.len)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine knil (string-ref vec1 i) (string-ref vec2 i) (string-ref vec3 i))
+	  (loop i+1 (+ 1 i+1)
+		(combine knil (string-ref vec1 i) (string-ref vec2 i) (string-ref vec3 i))))))))
+
+(define ($string-fold-left/list combine knil vec*)
+  (let ((vec.len (string-length (car vec*))))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	0)
+		 (i+1	1)
+		 (knil	knil))
+	(if (= i+1 vec.len)
+	    ;;Last call to COMBINE is in tail position.
+	    (apply combine knil ($map/1 (lambda (vec)
+					  (string-ref vec i))
+				  vec*))
+	  (loop i+1 (+ 1 i+1)
+		(apply combine knil ($map/1 (lambda (vec)
+					      (string-ref vec i))
+				      vec*))))))))
+
+;;; --------------------------------------------------------------------
+
+(define ($string-fold-right/1 combine knil vec)
+  (let ((vec.len (string-length vec)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	(sub1 vec.len))
+		 (knil	knil))
+	(if (zero? i)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine (string-ref vec i) knil)
+	  (loop (sub1 i) (combine (string-ref vec i) knil)))))))
+
+(define ($string-fold-right/2 combine knil vec1 vec2)
+  (let ((vec.len (string-length vec1)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	(sub1 vec.len))
+		 (knil	knil))
+	(if (zero? i)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine (string-ref vec1 i) (string-ref vec2 i) knil)
+	  (loop (sub1 i) (combine (string-ref vec1 i) (string-ref vec2 i) knil)))))))
+
+(define ($string-fold-right/3 combine knil vec1 vec2 vec3)
+  (let ((vec.len (string-length vec1)))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	(sub1 vec.len))
+		 (knil	knil))
+	(if (zero? i)
+	    ;;Last call to COMBINE is in tail position.
+	    (combine (string-ref vec1 i) (string-ref vec2 i) (string-ref vec3 i) knil)
+	  (loop (sub1 i)
+		(combine (string-ref vec1 i) (string-ref vec2 i) (string-ref vec3 i) knil)))))))
+
+(define ($string-fold-right/list combine knil vec*)
+  (let ((vec.len (string-length (car vec*))))
+    (if (zero? vec.len)
+	knil
+      (let loop ((i	(sub1 vec.len))
+		 (knil	knil))
+	(if (zero? i)
+	    ;;Last call to COMBINE is in tail position.
+	    (apply combine (append ($map/1 (lambda (vec)
+					     (string-ref vec i))
+				     vec*)
+				   (list knil)))
+	  (loop (sub1 i)
+		(apply combine (append ($map/1 (lambda (vec)
+						 (string-ref vec i))
+					 vec*)
+				       (list knil)))))))))
+
+;;; --------------------------------------------------------------------
+
+(define-string-folder string-fold-left
+  $string-fold-left/1
+  $string-fold-left/2
+  $string-fold-left/3
+  $string-fold-left/list)
+
+(define-string-folder string-fold-right
+  $string-fold-right/1
+  $string-fold-right/2
+  $string-fold-right/3
+  $string-fold-right/list)
+
+
+;;;; string-mapping functions
+
+(define ($string-map/1 func vec.in)
+  (receive-and-return (vec.out)
+      (make-string (string-length vec.in))
+    ($string-fold-left/1 (lambda (idx item)
+			   (string-set! vec.out idx (func item))
+			   (add1 idx))
+      0 vec.in)))
+
+(define ($string-map/2 func vec1 vec2)
+  (receive-and-return (vec.out)
+      (make-string (string-length vec1))
+    ($string-fold-left/2 (lambda (idx item1 item2)
+			   (string-set! vec.out idx (func item1 item2))
+			   (add1 idx))
+      0 vec1 vec2)))
+
+(define ($string-map/3 func vec1 vec2 vec3)
+  (receive-and-return (vec.out)
+      (make-string (string-length vec1))
+    ($string-fold-left/3 (lambda (idx item1 item2 item3)
+			   (string-set! vec.out idx (func item1 item2 item3))
+			   (add1 idx))
+      0 vec1 vec2 vec3)))
+
+(define ($string-map/list func vec*)
+  (receive-and-return (vec.out)
+      (make-string (string-length (car vec*)))
+    ($string-fold-left/list (lambda (idx . item*)
+			      (string-set! vec.out idx (apply func item*))
+			      (add1 idx))
+      0 vec*)))
+
+;;; --------------------------------------------------------------------
+
+(define ($string-for-each/1 func vec)
+  ($string-fold-left/1 (lambda (idx item)
+			 (func item)
+			 (add1 idx))
+    0 vec))
+
+(define ($string-for-each/2 func vec1 vec2)
+  ($string-fold-left/2 (lambda (idx item1 item2)
+			 (func item1 item2)
+			 (add1 idx))
+    0 vec1 vec2))
+
+(define ($string-for-each/3 func vec1 vec2 vec3)
+  ($string-fold-left/3 (lambda (idx item1 item2 item3)
+			 (func item1 item2 item3)
+			 (add1 idx))
+    0 vec1 vec2 vec3))
+
+(define ($string-for-each/list func vec*)
+  ($string-fold-left/list (lambda (idx . item*)
+			    (apply func item*)
+			    (add1 idx))
+    0 vec*))
+
+;;; --------------------------------------------------------------------
+
+(define $string-map-in-order/1		$string-map/1)
+(define $string-map-in-order/2		$string-map/2)
+(define $string-map-in-order/3		$string-map/3)
+(define $string-map-in-order/list	$string-map/list)
+
+;;; --------------------------------------------------------------------
+
+(define $string-for-each-in-order/1	$string-for-each/1)
+(define $string-for-each-in-order/2	$string-for-each/2)
+(define $string-for-each-in-order/3	$string-for-each/3)
+(define $string-for-each-in-order/list	$string-for-each/list)
+
+;;; --------------------------------------------------------------------
+
+(define-string-mapper string-map
+  $string-map/1
+  $string-map/2
+  $string-map/3
+  $string-map/list)
+
+(define-string-mapper string-for-each
+  $string-for-each/1
+  $string-for-each/2
+  $string-for-each/3
+  $string-for-each/list)
+
+(define-string-mapper string-map-in-order
+  $string-map-in-order/1
+  $string-map-in-order/2
+  $string-map-in-order/3
+  $string-map-in-order/list)
+
+(define-string-mapper string-for-each-in-order
+  $string-for-each-in-order/1
+  $string-for-each-in-order/2
+  $string-for-each-in-order/3
+  $string-for-each-in-order/list)
+
+
+;;;; string-map-indexping functions
+
+(define ($string-map-index/1 func vec.in)
+  (receive-and-return (vec.out)
+      (make-string (string-length vec.in))
+    ($string-fold-left/1 (lambda (idx item)
+			   (string-set! vec.out idx (func idx item))
+			   (add1 idx))
+      0 vec.in)))
+
+(define ($string-map-index/2 func vec1 vec2)
+  (receive-and-return (vec.out)
+      (make-string (string-length vec1))
+    ($string-fold-left/2 (lambda (idx item1 item2)
+			   (string-set! vec.out idx (func idx item1 item2))
+			   (add1 idx))
+      0 vec1 vec2)))
+
+(define ($string-map-index/3 func vec1 vec2 vec3)
+  (receive-and-return (vec.out)
+      (make-string (string-length vec1))
+    ($string-fold-left/3 (lambda (idx item1 item2 item3)
+			   (string-set! vec.out idx (func idx item1 item2 item3))
+			   (add1 idx))
+      0 vec1 vec2 vec3)))
+
+(define ($string-map-index/list func vec*)
+  (receive-and-return (vec.out)
+      (make-string (string-length (car vec*)))
+    ($string-fold-left/list (lambda (idx . item*)
+			      (string-set! vec.out idx (apply func idx item*))
+			      (add1 idx))
+      0 vec*)))
+
+;;; --------------------------------------------------------------------
+
+(define ($string-for-each-index/1 func vec)
+  ($string-fold-left/1 (lambda (idx item)
+			 (func idx item)
+			 (add1 idx))
+    0 vec))
+
+(define ($string-for-each-index/2 func vec1 vec2)
+  ($string-fold-left/2 (lambda (idx item1 item2)
+			 (func idx item1 item2)
+			 (add1 idx))
+    0 vec1 vec2))
+
+(define ($string-for-each-index/3 func vec1 vec2 vec3)
+  ($string-fold-left/3 (lambda (idx item1 item2 item3)
+			 (func idx item1 item2 item3)
+			 (add1 idx))
+    0 vec1 vec2 vec3))
+
+(define ($string-for-each-index/list func vec*)
+  ($string-fold-left/list (lambda (idx . item*)
+			    (apply func idx item*)
+			    (add1 idx))
+    0 vec*))
+
+;;; --------------------------------------------------------------------
+
+(define-string-mapper string-map-index
+  $string-map-index/1
+  $string-map-index/2
+  $string-map-index/3
+  $string-map-index/list)
+
+(define-string-mapper string-for-each-index
+  $string-for-each-index/1
+  $string-for-each-index/2
+  $string-for-each-index/3
+  $string-for-each-index/list)
+
+
+;;;; search functions
+
+(define ($string-for-all/1 pred vec)
+  (call/cc
+      (lambda (escape)
+	($string-fold-left/1 (lambda (knil item)
+			       (if (pred item)
+				   knil
+				 (escape #f)))
+	  #t vec))))
+
+(define ($string-for-all/2 pred vec1 vec2)
+  (call/cc
+      (lambda (escape)
+	($string-fold-left/2 (lambda (knil item1 item2)
+			       (if (pred item1 item2)
+				   knil
+				 (escape #f)))
+	  #t vec1 vec2))))
+
+(define ($string-for-all/3 pred vec1 vec2 vec3)
+  (call/cc
+      (lambda (escape)
+	($string-fold-left/3 (lambda (knil item1 item2 item3)
+			       (if (pred item1 item2 item3)
+				   knil
+				 (escape #f)))
+	  #t vec1 vec2 vec3))))
+
+(define ($string-for-all/list pred vec*)
+  (call/cc
+      (lambda (escape)
+	($string-fold-left/list (lambda (knil . item*)
+				  (if (apply pred item*)
+				      knil
+				    (escape #f)))
+	  #t vec*))))
+
+;;; --------------------------------------------------------------------
+
+(define ($string-exists/1 pred vec)
+  (call/cc
+      (lambda (escape)
+	($string-fold-left/1 (lambda (knil item)
+			       (cond ((pred item)
+				      => escape)
+				     (else
+				      knil)))
+	  #f vec))))
+
+(define ($string-exists/2 pred vec1 vec2)
+  (call/cc
+      (lambda (escape)
+	($string-fold-left/2 (lambda (knil item1 item2)
+			       (cond ((pred item1 item2)
+				      => escape)
+				     (else
+				      knil)))
+	  #f vec1 vec2))))
+
+(define ($string-exists/3 pred vec1 vec2 vec3)
+  (call/cc
+      (lambda (escape)
+	($string-fold-left/3 (lambda (knil item1 item2 item3)
+			       (cond ((pred item1 item2 item3)
+				      => escape)
+				     (else
+				      knil)))
+	  #f vec1 vec2 vec3))))
+
+(define ($string-exists/list pred vec*)
+  (call/cc
+      (lambda (escape)
+	($string-fold-left/list (lambda (knil . item*)
+				  (cond ((apply pred item*)
+					 => escape)
+					(else
+					 knil)))
+	  #f vec*))))
+
+;;; --------------------------------------------------------------------
+
+(case-define $string-find
+  ((pred vec)
+   ($string-find pred vec #f))
+  ((pred vec default)
+   (call/cc
+       (lambda (escape)
+	 ($string-fold-left/1 (lambda (knil item)
+				(if (pred item)
+				    (escape item)
+				  knil))
+	   default vec)))))
+
+;;; --------------------------------------------------------------------
+
+(case-define* string-find
+  ((pred vec)
+   ($string-find pred vec #f))
+  ((pred vec default)
+   (begin-checks
+     (assert-argument-type (__who__) "procedure" procedure? pred 1)
+     (assert-argument-type (__who__) "list"      string?    vec  2))
+   ($string-find pred vec default)))
+
+(define-string-searcher string-for-all
+  $string-for-all/1
+  $string-for-all/2
+  $string-for-all/3
+  $string-for-all/list)
+
+(define-string-searcher string-exists
+  $string-exists/1
+  $string-exists/2
+  $string-exists/3
+  $string-exists/list)
+
+
+;;;; copying
+
+(define* (string-copy dst.vec dst.start src.vec src.start src.end)
+  (begin-checks
+    (assert-argument-type (__who__) "string"      string?      dst.vec     1)
+    (assert-argument-type (__who__) "fixnum"      fixnum?      dst.start   2)
+    (assert-argument-type (__who__) "string"      string?      src.vec     3)
+    (assert-argument-type (__who__) "fixnum"      fixnum?      src.start   4)
+    (assert-argument-type (__who__) "fixnum"      fixnum?      src.end     5)
+    (unless (and (<= 0 dst.start)
+		 (<= dst.start (string-length dst.vec)))
+      (assertion-violation (__who__)
+	"invalid start index for destination string" dst.vec dst.start))
+    (unless (and (<= 0 src.start)
+		 (<= src.start (string-length src.vec)))
+      (assertion-violation (__who__)
+	"invalid start index for source string" src.vec src.start))
+    (unless (and (<= 0 src.end)
+		 (<= src.end (string-length src.vec)))
+      (assertion-violation (__who__)
+	"invalid end index for source string" src.vec src.end))
+    (unless (<= (- src.end src.start)
+		(- (string-length dst.vec) dst.start))
+      (assertion-violation (__who__)
+	"invalid range in source string for selected range in destination string"
+	dst.vec dst.start src.vec src.start src.end))
+    #| end of BEGIN-CHECKS |# )
+  ($string-copy dst.vec dst.start src.vec src.start src.end))
+
+(define ($string-copy dst.vec dst.start src.vec src.start src.end)
+  (do ((i dst.start (add1 i))
+       (j src.start (add1 j)))
+      ((= j src.end)
+       dst.vec)
+    (string-set! dst.vec i (string-ref src.vec j))))
+
+
+;;;; misc
+
+(define* (sorted-string-binary-search item< vec sought)
+  ;;Return false or a non-negative fixnum representing the index at which SOUGHT is present in VEC.
+  ;;
+  ;;Adapted from (retrieved on Thu Jul 21, 2016):
+  ;;
+  ;;  <https://www.cs.bgu.ac.il/~elhadad/scheme/binary-search.html>
+  ;;
+  (begin-checks
+    (assert-argument-type (__who__) "procedure"   procedure?   item<   1)
+    (assert-argument-type (__who__) "string"      string?      vec     2))
+  (define vec.len (string-length vec))
+  (if (zero? vec.len)
+      #f
+    (let loop ((start 0)
+	       (stop  (sub1 vec.len)))
+      (if (< stop start)
+	  #f
+	(let* ((mid-point (fxshr (+ start stop) 1))
+	       (mid-value (string-ref vec mid-point)))
+	  (cond ((item< sought mid-value)
+		 (loop start (sub1 mid-point)))
+		((item< mid-value sought)
+		 (loop (add1 mid-point) stop))
+		(else mid-point)))))))
 
 
 ;;;; done

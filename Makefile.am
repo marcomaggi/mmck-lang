@@ -436,6 +436,7 @@ MMCK_LANG_TEMP_FILES		+= \
 MMCK_LANG_STRINGS_DEPS = \
 	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
+	lib/mmck.lang.lists.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
 	$(MMCK_OBJECTS_DEPS)
 
