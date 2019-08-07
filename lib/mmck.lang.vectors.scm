@@ -148,7 +148,6 @@
 	  (mmck lang assertions)
 	  (only (mmck lang lists)
 		cons*
-		#;fold-left
 		$fold-left/1
 		$map/1)
 	  (mmck exceptional-conditions))
