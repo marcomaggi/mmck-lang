@@ -865,6 +865,23 @@
     (assert-argument-type (__who__) "vector"      vector?      src.vec     3)
     (assert-argument-type (__who__) "fixnum"      fixnum?      src.start   4)
     (assert-argument-type (__who__) "fixnum"      fixnum?      src.end     5)
+    (unless (and (<= 0 dst.start)
+		 (<= dst.start (vector-length dst.vec)))
+      (assertion-violation (__who__)
+	"invalid start index for destination vector" dst.vec dst.start))
+    (unless (and (<= 0 src.start)
+		 (<= src.start (vector-length src.vec)))
+      (assertion-violation (__who__)
+	"invalid start index for source vector" src.vec src.start))
+    (unless (and (<= 0 src.end)
+		 (<= src.end (vector-length src.vec)))
+      (assertion-violation (__who__)
+	"invalid end index for source vector" src.vec src.end))
+    (unless (<= (- src.end src.start)
+		(- (vector-length dst.vec) dst.start))
+      (assertion-violation (__who__)
+	"invalid range in source vector for selected range in destination vector"
+	dst.vec dst.start src.vec src.start src.end))
     #| end of BEGIN-CHECKS |# )
   ($vector-copy dst.vec dst.start src.vec src.start src.end))
 
@@ -874,23 +891,6 @@
       ((= j src.end)
        dst.vec)
     ($vector-set! dst.vec i ($vector-ref src.vec j))))
-
-(case-define vector-map-to-list
-  ((func vec)
-   (let loop ((i	(sub1 ($vector-length vec)))
-	      (result	'()))
-     (if (<= 0 i)
-	 (loop (- i 1) (cons (func ($vector-ref vec i)) result))
-       result)))
-
-  ((func vec1 vec2)
-   (let loop ((i	(sub1 ($vector-length vec1)))
-	      (result	'()))
-     (if (<= 0 i)
-	 (loop (- i 1) (cons (func ($vector-ref vec1 i)
-				     ($vector-ref vec2 i))
-			       result))
-       result))))
 
 
 ;;;; done
