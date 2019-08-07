@@ -51,6 +51,35 @@
   (values))
 
 
+(parameterise ((check-test-name		'constructors))
+
+  (check
+      (vector-append '#())
+    => '#())
+
+  (check
+      (vector-append '#() '#() '#())
+    => '#())
+
+  (check
+      (vector-append '#(a b c) '#() '#())
+    => '#(a b c))
+
+  (check
+      (vector-append '#() '#(a b c) '#())
+    => '#(a b c))
+
+  (check
+      (vector-append '#() '#() '#(a b c))
+    => '#(a b c))
+
+  (check
+      (vector-append '#(a b c) '#(d e) '#(f g h i))
+    => '#(a b c d e f g h i))
+
+  (values))
+
+
 (parameterise ((check-test-name		'predicates))
 
   (check-for-true	(list-of-vectors? '()))
@@ -1116,6 +1145,176 @@
   (values))
 
 
+(parameterise ((check-test-name		'map-index))
+
+  (check
+      (vector-map-index
+	  (lambda (idx item)
+	    (list idx item))
+	'#())
+    => '#())
+
+  (check
+      (vector-map-index
+	  (lambda (idx item)
+	    (list idx item))
+	'#(a b c))
+    => '#((0 a) (1 b) (2 c)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map-index
+	  (lambda (idx item1 item2)
+	    (list idx item1 item2))
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map-index
+	  (lambda (idx item1 item2)
+	    (list idx item1 item2))
+	'#(a b c)
+	'#(d e f))
+    => '#((0 a d) (1 b e) (2 c f)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map-index
+	  (lambda (idx item1 item2 item3)
+	    (list idx item1 item2 item3))
+	'#()
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map-index
+	  (lambda (idx item1 item2 item3)
+	    (list idx item1 item2 item3))
+	'#(a b c)
+	'#(d e f)
+	'#(g h i))
+    => '#((0 a d g) (1 b e h) (2 c f i)))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (vector-map-index
+	  (lambda (idx item1 item2 item3 item4)
+	    (list idx item1 item2 item3 item4))
+	'#()
+	'#()
+	'#()
+	'#())
+    => '#())
+
+  (check
+      (vector-map-index
+	  (lambda (idx item1 item2 item3 item4)
+	    (list idx item1 item2 item3 item4))
+	'#(a b c)
+	'#(d e f)
+	'#(g h i)
+	'#(l m n))
+    => '#((0 a d g l)
+	  (1 b e h m)
+	  (2 c f i n)))
+
+  (values))
+
+
+(parameterise ((check-test-name		'for-each-index))
+
+  (check
+      (with-result
+	(vector-for-each-index
+	    (lambda (idx item)
+	      (add-result (list idx item)))
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each-index
+	    (lambda (idx item)
+	      (add-result (list idx item)))
+	  '#(a b c)))
+    => '(3 ((0 a) (1 b) (2 c))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each-index
+	    (lambda (idx item1 item2)
+	      (add-result (list idx item1 item2)))
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each-index
+	    (lambda (idx item1 item2)
+	      (add-result (list idx item1 item2)))
+	  '#(a b c)
+	  '#(d e f)))
+    => '(3 ((0 a d) (1 b e) (2 c f))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each-index
+	    (lambda (idx item1 item2 item3)
+	      (add-result (list idx item1 item2 item3)))
+	  '#()
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each-index
+	    (lambda (idx item1 item2 item3)
+	      (add-result (list idx item1 item2 item3)))
+	  '#(a b c)
+	  '#(d e f)
+	  '#(g h i)))
+    => '(3 ((0 a d g) (1 b e h) (2 c f i))))
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (with-result
+	(vector-for-each-index
+	    (lambda (idx item1 item2 item3 item4)
+	      (add-result (list idx item1 item2 item3 item4)))
+	  '#()
+	  '#()
+	  '#()
+	  '#()))
+    => '(0 ()))
+
+  (check
+      (with-result
+	(vector-for-each-index
+	    (lambda (idx item1 item2 item3 item4)
+	      (add-result (list idx item1 item2 item3 item4)))
+	  '#(a b c)
+	  '#(d e f)
+	  '#(g h i)
+	  '#(l m n)))
+    => '(3 ((0 a d g l)
+	    (1 b e h m)
+	    (2 c f i n))))
+
+  (values))
+
+
 (parameterise ((check-test-name		'for-all))
 
   (check
@@ -1614,6 +1813,32 @@
   (check
       ($vector-find even? '#(1 2 3))
     => 2)
+
+  (values))
+
+
+(parameterise ((check-test-name		'copying))
+
+  (check
+      (let ((src.vec	'#(a b c d e))
+	    (dst.vec	(make-vector 5 #f)))
+	(vector-copy dst.vec 0
+		     src.vec 0 (vector-length src.vec)))
+    => '#(a b c d e))
+
+  (check
+      (let ((src.vec	'#(a b c d e))
+	    (dst.vec	(make-vector 5 #f)))
+	(vector-copy dst.vec 0
+		     src.vec 3 3))
+    => '#(#f #f #f #f #f))
+
+  (check
+      (let ((src.vec	'#(a b c d e))
+	    (dst.vec	(make-vector 5 #f)))
+	(vector-copy dst.vec 1
+		     src.vec 1 4))
+    => '#(#f b c d #f))
 
   (values))
 

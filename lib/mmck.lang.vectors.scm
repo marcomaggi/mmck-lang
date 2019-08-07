@@ -40,7 +40,12 @@
      (syntax: $vector-set-immediate!)
      (syntax: $vector-length)
 
+     ;; constructors
+     vector-append
+
      ;; predicates
+     vector-empty?
+     vector-not-empty?
      list-of-vectors?
      vectors-of-equal-length?
      list-of-vectors-of-equal-length?
@@ -50,6 +55,7 @@
      vector-find vector-exists vector-for-all
      vector-map vector-for-each
      vector-map-in-order vector-for-each-in-order
+     vector-map-index vector-for-each-index
 
      ;; unsafe iteration and searching
      $vector-fold-left/1
@@ -82,6 +88,16 @@
      $vector-for-each-in-order/3
      $vector-for-each-in-order/list
      ;;
+     $vector-map-index/1
+     $vector-map-index/2
+     $vector-map-index/3
+     $vector-map-index/list
+     ;;
+     $vector-for-each-index/1
+     $vector-for-each-index/2
+     $vector-for-each-index/3
+     $vector-for-each-index/list
+     ;;
      $vector-for-all/1
      $vector-for-all/2
      $vector-for-all/3
@@ -93,6 +109,10 @@
      $vector-exists/list
      ;;
      $vector-find
+
+     ;; copying
+     vector-copy
+     $vector-copy
 
      ;; exceptional-condition object-types
      &vector-is-empty
@@ -115,6 +135,7 @@
 		add1
 		sub1
 		call/cc
+		fixnum?
 		void
 		when)
 	  (mmck lang debug)
@@ -122,7 +143,8 @@
 	  (mmck lang assertions)
 	  (only (mmck lang lists)
 		cons*
-		fold-left
+		#;fold-left
+		$fold-left/1
 		$map/1)
 	  (mmck exceptional-conditions))
 
@@ -161,114 +183,114 @@
   (syntax-rules ()
     ((_ ?who ?vector-folder/1 ?vector-folder/2 ?vector-folder/3 ?vector-folder/list)
      (case-define ?who
-       ((combine nil ell)
+       ((combine nil vec)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell     2))
-	(?vector-folder/1 combine nil ell))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec     2))
+	(?vector-folder/1 combine nil vec))
 
-       ((combine nil ell1 ell2)
+       ((combine nil vec1 vec2)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1    2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2    3)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2))
-	(?vector-folder/2 combine nil ell1 ell2))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1    2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2    3)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2))
+	(?vector-folder/2 combine nil vec1 vec2))
 
-       ((combine nil ell1 ell2 ell3)
+       ((combine nil vec1 vec2 vec3)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1    2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2    3)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell3    4)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3))
-	(?vector-folder/3 combine nil ell1 ell2 ell3))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1    2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2    3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec3    4)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2 vec3))
+	(?vector-folder/3 combine nil vec1 vec2 vec3))
 
-       ((combine nil ell1 ell2 ell3 . ell*)
+       ((combine nil vec1 vec2 vec3 . vec*)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1    2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2    3)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell3    4)
-	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? ell*)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
-	(?vector-folder/list combine nil (cons* ell1 ell2 ell3 ell*)))))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1    2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2    3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec3    4)
+	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? vec*)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
+	(?vector-folder/list combine nil (cons* vec1 vec2 vec3 vec*)))))
     ))
 
 (define-syntax define-vector-mapper
   (syntax-rules ()
     ((_ ?who ?vector-mapper/1 ?vector-mapper/2 ?vector-mapper/3 ?vector-mapper/list)
      (case-define ?who
-       ((func ell)
+       ((func vec)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell  2))
-	(?vector-mapper/1 func ell))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec  2))
+	(?vector-mapper/1 func vec))
 
-       ((func ell1 ell2)
+       ((func vec1 vec2)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2))
-	(?vector-mapper/2 func ell1 ell2))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2 3)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2))
+	(?vector-mapper/2 func vec1 vec2))
 
-       ((func ell1 ell2 ell3)
+       ((func vec1 vec2 vec3)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell3 4)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3))
-	(?vector-mapper/3 func ell1 ell2 ell3))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2 3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec3 4)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2 vec3))
+	(?vector-mapper/3 func vec1 vec2 vec3))
 
-       ((func ell1 ell2 ell3 . ell*)
+       ((func vec1 vec2 vec3 . vec*)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell3 4)
-	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? ell*)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
-	(?vector-mapper/list func (cons* ell1 ell2 ell3 ell*)))))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2 3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec3 4)
+	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? vec*)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
+	(?vector-mapper/list func (cons* vec1 vec2 vec3 vec*)))))
     ))
 
 (define-syntax define-vector-searcher
   (syntax-rules ()
     ((_ ?who ?vector-searcher/1 ?vector-searcher/2 ?vector-searcher/3 ?vector-searcher/list)
      (case-define ?who
-       ((pred ell)
+       ((pred vec)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell  2))
-	(?vector-searcher/1 pred ell))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec  2))
+	(?vector-searcher/1 pred vec))
 
-       ((pred ell1 ell2)
+       ((pred vec1 vec2)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2))
-	(?vector-searcher/2 pred ell1 ell2))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2 3)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2))
+	(?vector-searcher/2 pred vec1 vec2))
 
-       ((pred ell1 ell2 ell3)
+       ((pred vec1 vec2 vec3)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell3 4)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3))
-	(?vector-searcher/3 pred ell1 ell2 ell3))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2 3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec3 4)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2 vec3))
+	(?vector-searcher/3 pred vec1 vec2 vec3))
 
-       ((pred ell1 ell2 ell3 . ell*)
+       ((pred vec1 vec2 vec3 . vec*)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell1 2)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell2 3)
-	  (assert-argument-type (quote ?who) "vector"      vector?      ell3 4)
-	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? ell*)
-	  (assert-vectors-of-equal-length (quote ?who) ell1 ell2 ell3 ell*))
-	(?vector-searcher/list pred (cons* ell1 ell2 ell3 ell*)))))
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec1 2)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec2 3)
+	  (assert-argument-type (quote ?who) "vector"      vector?      vec3 4)
+	  (assert-argument-type/rest (quote ?who) "vector of vectors" list-of-vectors? vec*)
+	  (assert-vectors-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
+	(?vector-searcher/list pred (cons* vec1 vec2 vec3 vec*)))))
     ))
 
 
@@ -315,7 +337,29 @@
 	      (make-irritants-condition (vector vector-of-vectors)))))
 
 
+;;;; constructors
+
+(define (vector-append . vec*)
+  (receive-and-return (dst.vec)
+      (make-vector ($fold-left/1 (lambda (nil vec)
+				   (+ nil ($vector-length vec)))
+		     0 vec*))
+    ($fold-left/1 (lambda (dst.idx src.vec)
+		    (let ((src.len ($vector-length src.vec)))
+		      (vector-copy dst.vec dst.idx src.vec 0 src.len)
+		      (+ dst.idx src.len)))
+      0 vec*)))
+
+
 ;;;; predicates
+
+(define (vector-empty? obj)
+  (and (vector? obj)
+       (zero? (vector-length obj))))
+
+(define (vector-not-empty? obj)
+  (and (vector? obj)
+       (positive? (vector-length obj))))
 
 (define (list-of-vectors? objs)
   ;;Return true if OBJS is a (possibly empty)  list of vectors; otherwise return false.  Notice that
@@ -619,6 +663,81 @@
   $vector-for-each-in-order/list)
 
 
+;;;; vector-map-indexping functions
+
+(define ($vector-map-index/1 func vec.in)
+  (receive-and-return (vec.out)
+      (make-vector (vector-length vec.in))
+    ($vector-fold-left/1 (lambda (idx item)
+			   (vector-set! vec.out idx (func idx item))
+			   (add1 idx))
+      0 vec.in)))
+
+(define ($vector-map-index/2 func vec1 vec2)
+  (receive-and-return (vec.out)
+      (make-vector (vector-length vec1))
+    ($vector-fold-left/2 (lambda (idx item1 item2)
+			   (vector-set! vec.out idx (func idx item1 item2))
+			   (add1 idx))
+      0 vec1 vec2)))
+
+(define ($vector-map-index/3 func vec1 vec2 vec3)
+  (receive-and-return (vec.out)
+      (make-vector (vector-length vec1))
+    ($vector-fold-left/3 (lambda (idx item1 item2 item3)
+			   (vector-set! vec.out idx (func idx item1 item2 item3))
+			   (add1 idx))
+      0 vec1 vec2 vec3)))
+
+(define ($vector-map-index/list func vec*)
+  (receive-and-return (vec.out)
+      (make-vector (vector-length (car vec*)))
+    ($vector-fold-left/list (lambda (idx . item*)
+			      (vector-set! vec.out idx (apply func idx item*))
+			      (add1 idx))
+      0 vec*)))
+
+;;; --------------------------------------------------------------------
+
+(define ($vector-for-each-index/1 func vec)
+  ($vector-fold-left/1 (lambda (idx item)
+			 (func idx item)
+			 (add1 idx))
+    0 vec))
+
+(define ($vector-for-each-index/2 func vec1 vec2)
+  ($vector-fold-left/2 (lambda (idx item1 item2)
+			 (func idx item1 item2)
+			 (add1 idx))
+    0 vec1 vec2))
+
+(define ($vector-for-each-index/3 func vec1 vec2 vec3)
+  ($vector-fold-left/3 (lambda (idx item1 item2 item3)
+			 (func idx item1 item2 item3)
+			 (add1 idx))
+    0 vec1 vec2 vec3))
+
+(define ($vector-for-each-index/list func vec*)
+  ($vector-fold-left/list (lambda (idx . item*)
+			    (apply func idx item*)
+			    (add1 idx))
+    0 vec*))
+
+;;; --------------------------------------------------------------------
+
+(define-vector-mapper vector-map-index
+  $vector-map-index/1
+  $vector-map-index/2
+  $vector-map-index/3
+  $vector-map-index/list)
+
+(define-vector-mapper vector-for-each-index
+  $vector-for-each-index/1
+  $vector-for-each-index/2
+  $vector-for-each-index/3
+  $vector-for-each-index/list)
+
+
 ;;;; search functions
 
 (define ($vector-for-all/1 pred vec)
@@ -737,47 +856,41 @@
   $vector-exists/list)
 
 
-;;;; operations
+;;;; copying
 
-(define (vector-copy dst.vec dst.start src.vec src.start src.end)
-  (do ((i dst.start (+ 1 i))
-       (j src.start (+ 1 j)))
-      ((= j src.end))
+(define* (vector-copy dst.vec dst.start src.vec src.start src.end)
+  (begin-checks
+    (assert-argument-type (__who__) "vector"      vector?      dst.vec     1)
+    (assert-argument-type (__who__) "fixnum"      fixnum?      dst.start   2)
+    (assert-argument-type (__who__) "vector"      vector?      src.vec     3)
+    (assert-argument-type (__who__) "fixnum"      fixnum?      src.start   4)
+    (assert-argument-type (__who__) "fixnum"      fixnum?      src.end     5)
+    #| end of BEGIN-CHECKS |# )
+  ($vector-copy dst.vec dst.start src.vec src.start src.end))
+
+(define ($vector-copy dst.vec dst.start src.vec src.start src.end)
+  (do ((i dst.start (add1 i))
+       (j src.start (add1 j)))
+      ((= j src.end)
+       dst.vec)
     ($vector-set! dst.vec i ($vector-ref src.vec j))))
-
-(define (vector-append . vecs)
-  (receive-and-return (dst.vec)
-      (make-vector (fold-left (lambda (nil vec)
-				(+ nil ($vector-length vec)))
-		     0 vecs))
-    (fold-left (lambda (dst.idx src.vec)
-		 (let ((src.len ($vector-length src.vec)))
-		   (vector-copy dst.vec dst.idx src.vec 0 src.len)
-		   (+ dst.idx src.len)))
-      0 vecs)))
 
 (case-define vector-map-to-list
   ((func vec)
-   (let loop ((i	(- ($vector-length vec) 1))
+   (let loop ((i	(sub1 ($vector-length vec)))
 	      (result	'()))
      (if (<= 0 i)
 	 (loop (- i 1) (cons (func ($vector-ref vec i)) result))
        result)))
 
   ((func vec1 vec2)
-   (let loop ((i	(- ($vector-length vec1) 1))
+   (let loop ((i	(sub1 ($vector-length vec1)))
 	      (result	'()))
      (if (<= 0 i)
 	 (loop (- i 1) (cons (func ($vector-ref vec1 i)
 				     ($vector-ref vec2 i))
 			       result))
        result))))
-
-(define (vector-for-each-index func vec)
-  (let loop ((idx 0))
-    (when (< idx ($vector-length vec))
-      (func idx ($vector-ref vec idx))
-      (loop (+ 1 idx)))))
 
 
 ;;;; done
