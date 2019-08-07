@@ -29,6 +29,7 @@
     ()
   (import (scheme)
 	  (only (chicken base)
+		add1
 		void)
 	  (mmck lang)
 	  (mmck exceptional-conditions)
@@ -1839,6 +1840,41 @@
 	(vector-copy dst.vec 1
 		     src.vec 1 4))
     => '#(#f b c d #f))
+
+  (values))
+
+
+(parameterise ((check-test-name		'sorted))
+
+  (define (symbol<? a b)
+    (string<? (symbol->string a)
+	      (symbol->string b)))
+
+  (check
+      (sorted-vector-binary-search < '#() 1)
+    => #f)
+
+  (check
+      (sorted-vector-binary-search < '#(0 1 2 3 4 5 6 7 8 9) 999)
+    => #f)
+
+  (check
+      (sorted-vector-binary-search < '#(0 1 2 3 4 5 6 7 8 9) -999)
+    => #f)
+
+  (do ((i 0 (add1 i)))
+      ((= i 10))
+    (check
+	(sorted-vector-binary-search < '#(0 1 2 3 4 5 6 7 8 9) i)
+      => i))
+
+  (do ((i 0 (add1 i)))
+      ((= i 10))
+    (let* ((vec '#(a b c d e f g h i l m))
+	   (sym (vector-ref vec i)))
+      (check
+	  (sorted-vector-binary-search symbol<? vec sym)
+	=> i)))
 
   (values))
 

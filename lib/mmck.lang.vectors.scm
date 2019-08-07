@@ -114,6 +114,9 @@
      vector-copy
      $vector-copy
 
+     ;; miscellaneous
+     sorted-vector-binary-search
+
      ;; exceptional-condition object-types
      &vector-is-empty
      make-vector-is-empty-condition
@@ -138,6 +141,8 @@
 		fixnum?
 		void
 		when)
+	  (only (chicken fixnum)
+		fxshr)
 	  (mmck lang debug)
 	  (mmck lang core)
 	  (mmck lang assertions)
@@ -891,6 +896,34 @@
       ((= j src.end)
        dst.vec)
     ($vector-set! dst.vec i ($vector-ref src.vec j))))
+
+
+;;;; misc
+
+(define* (sorted-vector-binary-search item< vec sought)
+  ;;Return false or a non-negative fixnum representing the index at which SOUGHT is present in VEC.
+  ;;
+  ;;Adapted from (retrieved on Thu Jul 21, 2016):
+  ;;
+  ;;  <https://www.cs.bgu.ac.il/~elhadad/scheme/binary-search.html>
+  ;;
+  (begin-checks
+    (assert-argument-type (__who__) "procedure"   procedure?   item<   1)
+    (assert-argument-type (__who__) "vector"      vector?      vec     2))
+  (define vec.len (vector-length vec))
+  (if (zero? vec.len)
+      #f
+    (let loop ((start 0)
+	       (stop  (sub1 vec.len)))
+      (if (< stop start)
+	  #f
+	(let* ((mid-point (fxshr (+ start stop) 1))
+	       (mid-value (vector-ref vec mid-point)))
+	  (cond ((item< sought mid-value)
+		 (loop start (sub1 mid-point)))
+		((item< mid-value sought)
+		 (loop (add1 mid-point) stop))
+		(else mid-point)))))))
 
 
 ;;;; done
