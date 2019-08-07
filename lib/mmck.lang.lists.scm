@@ -535,23 +535,32 @@
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
   (if (pair? ell)
-      ($fold-left/1 combine (combine knil (car ell)) (cdr ell))
+      (if (null? (cdr ell))
+	  ;;Perform a tail call to COMBINE for the last element.
+	  (combine knil (car ell))
+	($fold-left/1 combine (combine knil (car ell)) (cdr ell)))
     knil))
 
 (define ($fold-left/2 combine knil ell1 ell2)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
   (if (pair? ell1)
-      ($fold-left/2 combine (combine knil (car ell1) (car ell2)) (cdr ell1) (cdr ell2))
+      (if (null? (cdr ell1))
+	  ;;Perform a tail call to COMBINE for the last element.
+	  (combine knil (car ell1) (car ell2))
+	($fold-left/2 combine (combine knil (car ell1) (car ell2)) (cdr ell1) (cdr ell2)))
     knil))
 
 (define ($fold-left/3 combine knil ell1 ell2 ell3)
   ;;NOTE Let's avoid doing this with a non-tail recursion!!!
   ;;
   (if (pair? ell1)
-      ($fold-left/3 combine
-	(combine knil (car ell1) (car ell2) (car ell3))
-	(cdr ell1) (cdr ell2) (cdr ell3))
+      (if (null? (cdr ell1))
+	  ;;Perform a tail call to COMBINE for the last element.
+	  (combine knil (car ell1) (car ell2) (car ell3))
+	($fold-left/3 combine
+	  (combine knil (car ell1) (car ell2) (car ell3))
+	  (cdr ell1) (cdr ell2) (cdr ell3)))
     knil))
 
 (define ($fold-left/list combine knil ell*)
@@ -562,9 +571,13 @@
       knil
     (receive (car* cdr*)
 	(cars-and-cdrs ell*)
-      ($fold-left/list combine
-	(apply combine knil car*)
-	cdr*))))
+      (if (or (null? cdr*)
+	      (null? (car cdr*)))
+	  ;;Perform a tail call to COMBINE for the last elements.
+	  (apply combine knil car*)
+	($fold-left/list combine
+	  (apply combine knil car*)
+	  cdr*)))))
 
 ;;; --------------------------------------------------------------------
 
@@ -574,8 +587,11 @@
   (let loop ((knil	knil)
 	     (rev-ell	(reverse ell)))
     (if (pair? rev-ell)
-	(loop (combine (car rev-ell) knil)
-	      (cdr rev-ell))
+	(if (null? (cdr rev-ell))
+	    ;;Perform a tail call to COMBINE for the last element.
+	    (combine (car rev-ell) knil)
+	  (loop (combine (car rev-ell) knil)
+		(cdr rev-ell)))
       knil)))
 
 (define ($fold-right/2 combine knil ell1 ell2)
@@ -584,8 +600,11 @@
   (let loop ((knil	knil)
 	     (cars*	(gather-cars-in-reverse (list ell1 ell2))))
     (if (pair? cars*)
-	(loop (apply combine (append (car cars*) (list knil)))
-	      (cdr cars*))
+	(if (null? (cdr cars*))
+	    ;;Perform a tail call to COMBINE for the last element.
+	    (apply combine (append (car cars*) (list knil)))
+	  (loop (apply combine (append (car cars*) (list knil)))
+		(cdr cars*)))
       knil)))
 
 (define ($fold-right/3 combine knil ell1 ell2 ell3)
@@ -594,8 +613,11 @@
   (let loop ((knil	knil)
 	     (cars*	(gather-cars-in-reverse (list ell1 ell2 ell3))))
     (if (pair? cars*)
-	(loop (apply combine (append (car cars*) (list knil)))
-	      (cdr cars*))
+	(if (null? (cdr cars*))
+	    ;;Perform a tail call to COMBINE for the last element.
+	    (apply combine (append (car cars*) (list knil)))
+	  (loop (apply combine (append (car cars*) (list knil)))
+		(cdr cars*)))
       knil)))
 
 (define ($fold-right/list combine knil ell*)
@@ -604,8 +626,11 @@
   (let loop ((knil	knil)
 	     (cars*	(gather-cars-in-reverse ell*)))
     (if (pair? cars*)
-	(loop (apply combine (append (car cars*) (list knil)))
-	      (cdr cars*))
+	(if (null? (cdr cars*))
+	    ;;Perform a tail call to COMBINE for the last element.
+	    (apply combine (append (car cars*) (list knil)))
+	  (loop (apply combine (append (car cars*) (list knil)))
+		(cdr cars*)))
       knil)))
 
 ;;; --------------------------------------------------------------------
