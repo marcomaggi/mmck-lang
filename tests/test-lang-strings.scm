@@ -73,6 +73,12 @@
   (check-for-false	(list-of-strings-of-equal-length? '("a" (b))))
   (check-for-false	(list-of-strings-of-equal-length? '("a" "ab")))
 
+  (check-for-true	(list-of-strings-of-equal-length? '("a" "b" "c")))
+  (check-for-false	(list-of-strings-of-equal-length? '("a" "b" "c99")))
+
+  (check-for-true	(list-of-strings-of-equal-length? '("a" "b" "c" "d")))
+  (check-for-false	(list-of-strings-of-equal-length? '("a" "b" "c" "d99")))
+
 ;;; --------------------------------------------------------------------
 
   (check-for-true	(strings-of-equal-length? ""))
@@ -81,6 +87,12 @@
 
   (check-for-false	(strings-of-equal-length? '"a" '(b)))
   (check-for-false	(strings-of-equal-length? '"a" '"ab"))
+
+  (check-for-true	(strings-of-equal-length? "a" "b" "c"))
+  (check-for-false	(strings-of-equal-length? "a" "b" "c99"))
+
+  (check-for-true	(strings-of-equal-length? "a" "b" "c" "d"))
+  (check-for-false	(strings-of-equal-length? "a" "b" "c" "d99"))
 
   (values))
 

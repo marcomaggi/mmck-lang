@@ -145,6 +145,7 @@
 	  (mmck lang assertions)
 	  (only (mmck lang lists)
 		cons*
+		$for-all/1
 		$fold-left/1
 		$map/1)
 	  (mmck exceptional-conditions))
@@ -171,32 +172,32 @@
 	  (assert-argument-type (quote ?who) "string"      string?      vec     2))
 	(?string-folder/1 combine nil vec))
 
-       ((combine nil vec1 vec2)
+       ((combine nil str1 str2)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1    2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2    3)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2))
-	(?string-folder/2 combine nil vec1 vec2))
+	  (assert-argument-type (quote ?who) "string"      string?      str1    2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2    3)
+	  (assert-strings-of-equal-length (quote ?who) str1 str2))
+	(?string-folder/2 combine nil str1 str2))
 
-       ((combine nil vec1 vec2 vec3)
+       ((combine nil str1 str2 str3)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1    2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2    3)
-	  (assert-argument-type (quote ?who) "string"      string?      vec3    4)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3))
-	(?string-folder/3 combine nil vec1 vec2 vec3))
+	  (assert-argument-type (quote ?who) "string"      string?      str1    2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2    3)
+	  (assert-argument-type (quote ?who) "string"      string?      str3    4)
+	  (assert-strings-of-equal-length (quote ?who) str1 str2 str3))
+	(?string-folder/3 combine nil str1 str2 str3))
 
-       ((combine nil vec1 vec2 vec3 . vec*)
+       ((combine nil str1 str2 str3 . vec*)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? combine 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1    2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2    3)
-	  (assert-argument-type (quote ?who) "string"      string?      vec3    4)
+	  (assert-argument-type (quote ?who) "string"      string?      str1    2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2    3)
+	  (assert-argument-type (quote ?who) "string"      string?      str3    4)
 	  (assert-argument-type/rest (quote ?who) "string of strings" list-of-strings? vec*)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
-	(?string-folder/list combine nil (cons* vec1 vec2 vec3 vec*)))))
+	  (assert-strings-of-equal-length (quote ?who) str1 str2 str3 vec*))
+	(?string-folder/list combine nil (cons* str1 str2 str3 vec*)))))
     ))
 
 (define-syntax define-string-mapper
@@ -209,32 +210,32 @@
 	  (assert-argument-type (quote ?who) "string"      string?      vec  2))
 	(?string-mapper/1 func vec))
 
-       ((func vec1 vec2)
+       ((func str1 str2)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2))
-	(?string-mapper/2 func vec1 vec2))
+	  (assert-argument-type (quote ?who) "string"      string?      str1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2 3)
+	  (assert-strings-of-equal-length (quote ?who) str1 str2))
+	(?string-mapper/2 func str1 str2))
 
-       ((func vec1 vec2 vec3)
+       ((func str1 str2 str3)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
-	  (assert-argument-type (quote ?who) "string"      string?      vec3 4)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3))
-	(?string-mapper/3 func vec1 vec2 vec3))
+	  (assert-argument-type (quote ?who) "string"      string?      str1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2 3)
+	  (assert-argument-type (quote ?who) "string"      string?      str3 4)
+	  (assert-strings-of-equal-length (quote ?who) str1 str2 str3))
+	(?string-mapper/3 func str1 str2 str3))
 
-       ((func vec1 vec2 vec3 . vec*)
+       ((func str1 str2 str3 . vec*)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? func 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
-	  (assert-argument-type (quote ?who) "string"      string?      vec3 4)
+	  (assert-argument-type (quote ?who) "string"      string?      str1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2 3)
+	  (assert-argument-type (quote ?who) "string"      string?      str3 4)
 	  (assert-argument-type/rest (quote ?who) "string of strings" list-of-strings? vec*)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
-	(?string-mapper/list func (cons* vec1 vec2 vec3 vec*)))))
+	  (assert-strings-of-equal-length (quote ?who) str1 str2 str3 vec*))
+	(?string-mapper/list func (cons* str1 str2 str3 vec*)))))
     ))
 
 (define-syntax define-string-searcher
@@ -247,32 +248,32 @@
 	  (assert-argument-type (quote ?who) "string"      string?      vec  2))
 	(?string-searcher/1 pred vec))
 
-       ((pred vec1 vec2)
+       ((pred str1 str2)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2))
-	(?string-searcher/2 pred vec1 vec2))
+	  (assert-argument-type (quote ?who) "string"      string?      str1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2 3)
+	  (assert-strings-of-equal-length (quote ?who) str1 str2))
+	(?string-searcher/2 pred str1 str2))
 
-       ((pred vec1 vec2 vec3)
+       ((pred str1 str2 str3)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
-	  (assert-argument-type (quote ?who) "string"      string?      vec3 4)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3))
-	(?string-searcher/3 pred vec1 vec2 vec3))
+	  (assert-argument-type (quote ?who) "string"      string?      str1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2 3)
+	  (assert-argument-type (quote ?who) "string"      string?      str3 4)
+	  (assert-strings-of-equal-length (quote ?who) str1 str2 str3))
+	(?string-searcher/3 pred str1 str2 str3))
 
-       ((pred vec1 vec2 vec3 . vec*)
+       ((pred str1 str2 str3 . vec*)
 	(begin-checks
 	  (assert-argument-type (quote ?who) "procedure" procedure? pred 1)
-	  (assert-argument-type (quote ?who) "string"      string?      vec1 2)
-	  (assert-argument-type (quote ?who) "string"      string?      vec2 3)
-	  (assert-argument-type (quote ?who) "string"      string?      vec3 4)
+	  (assert-argument-type (quote ?who) "string"      string?      str1 2)
+	  (assert-argument-type (quote ?who) "string"      string?      str2 3)
+	  (assert-argument-type (quote ?who) "string"      string?      str3 4)
 	  (assert-argument-type/rest (quote ?who) "string of strings" list-of-strings? vec*)
-	  (assert-strings-of-equal-length (quote ?who) vec1 vec2 vec3 vec*))
-	(?string-searcher/list pred (cons* vec1 vec2 vec3 vec*)))))
+	  (assert-strings-of-equal-length (quote ?who) str1 str2 str3 vec*))
+	(?string-searcher/list pred (cons* str1 str2 str3 vec*)))))
     ))
 
 
@@ -288,7 +289,7 @@
    (condition (make-strings-are-of-different-length-condition)
 	      (make-who-condition who)
 	      (make-message-condition "invalid arguments, strings are of different length")
-	      (make-irritants-condition (string string-of-strings)))))
+	      (make-irritants-condition (list string-of-strings)))))
 
 ;;; --------------------------------------------------------------------
 
@@ -302,7 +303,7 @@
    (condition (make-string-is-empty-condition)
 	      (make-who-condition who)
 	      (make-message-condition "invalid operand, expected non-empty string")
-	      (make-irritants-condition (string obj)))))
+	      (make-irritants-condition (list obj)))))
 
 ;;; --------------------------------------------------------------------
 
@@ -316,7 +317,7 @@
    (condition (make-strings-are-empty-or-of-different-length-condition)
 	      (make-who-condition who)
 	      (make-message-condition "invalid arguments, strings are empty or of different length")
-	      (make-irritants-condition (string string-of-strings)))))
+	      (make-irritants-condition (list string-of-strings)))))
 
 
 ;;;; constructors
@@ -342,69 +343,69 @@
 	   (string? (car objs))
 	   (list-of-strings? (cdr objs)))))
 
-(define (list-of-strings-of-equal-length? vec*)
-  ;;Return true if VEC*  is a list of strings of equal length;  otherwise return false.  Notice that
-  ;;this function returns false if VEC* is not null or a proper list of pairs.
+(define (list-of-strings-of-equal-length? str*)
+  ;;Return true if STR*  is a list of strings of equal length;  otherwise return false.  Notice that
+  ;;this function returns false if STR* is not null or a proper list of pairs.
   ;;
-  (or (null? vec*)
-      (and (pair? vec*)
-	   (string? (car vec*))
-	   (let loop ((len1 (string-length (car vec*)))
-		      (vec* (cdr vec*)))
-	     (or (null? vec*)
-		 (and (pair? vec*)
-		      (string? (car vec*))
-		      (= len1 (string-length (car vec*)))
-		      (loop len1 (cdr vec*))))))))
+  (or (null? str*)
+      (and (pair? str*)
+	   (string? (car str*))
+	   (let loop ((len1 (string-length (car str*)))
+		      (str* (cdr str*)))
+	     (or (null? str*)
+		 (and (pair? str*)
+		      (string? (car str*))
+		      (= len1 (string-length (car str*)))
+		      (loop len1 (cdr str*))))))))
 
 (case-define strings-of-equal-length?
   ;;Return true if  all the arguments are  strings of equal length; otherwise  return false.  Notice
   ;;that this function returns false if one of the arguments is not a string.
   ;;
-  ((vec1)
-   (string? vec1))
+  ((str1)
+   (string? str1))
 
-  ((vec1 vec2)
-   (and (string? vec1)
-	(string? vec2)
-	(= (string-length vec1)
-	   (string-length vec2))))
+  ((str1 str2)
+   (and (string? str1)
+	(string? str2)
+	(= (string-length str1)
+	   (string-length str2))))
 
-  ((vec1 vec2 vec3)
-   (and (string? vec1)
-	(string? vec2)
-	(string? vec3)
-	(= (string-length vec1)
-	   (string-length vec2)
-	   (string-length vec3))))
+  ((str1 str2 str3)
+   (and (string? str1)
+	(string? str2)
+	(string? str3)
+	(= (string-length str1)
+	   (string-length str2)
+	   (string-length str3))))
 
 
-  ((vec1 vec2 vec3 . vec*)
-   (and (string? vec1)
-	(string? vec2)
-	(string? vec3)
-	(= (string-length vec1)
-	   (string-length vec2)
-	   (string-length vec3))
-	($string-for-all/1 (lambda (knil vec)
-			     (= knil (string-length vec)))
-			   (string-length vec1)
-			   vec*)))
+  ((str1 str2 str3 . str*)
+   (and (string? str1)
+	(string? str2)
+	(string? str3)
+	(let ((str.len (string-length str1)))
+	  (and (= str.len
+		  (string-length str2)
+		  (string-length str3))
+	       ($for-all/1 (lambda (str)
+			     (= str.len (string-length str)))
+		 str*)))))
   #| end of CASE-DEFINE |# )
 
 
 ;;;; special exceptional-condition raisers
 
 (case-define assert-strings-of-equal-length
-  ((who vec1 vec2)
-   (unless (strings-of-equal-length? vec1 vec2)
-     (raise-exception-strings-are-of-different-length who (string vec1 vec2))))
-  ((who vec1 vec2 vec3)
-   (unless (strings-of-equal-length? vec1 vec2 vec3)
-     (raise-exception-strings-are-of-different-length who (string vec1 vec2 vec3))))
-  ((who vec1 vec2 vec3 vec*)
-   (unless (list-of-strings-of-equal-length? (cons* vec1 vec2 vec3 vec*))
-     (raise-exception-strings-are-of-different-length who (cons* vec1 vec2 vec3 vec*)))))
+  ((who str1 str2)
+   (unless (strings-of-equal-length? str1 str2)
+     (raise-exception-strings-are-of-different-length who (list str1 str2))))
+  ((who str1 str2 str3)
+   (unless (strings-of-equal-length? str1 str2 str3)
+     (raise-exception-strings-are-of-different-length who (list str1 str2 str3))))
+  ((who str1 str2 str3 str*)
+   (unless (list-of-strings-of-equal-length? (cons* str1 str2 str3 str*))
+     (raise-exception-strings-are-of-different-length who (cons* str1 str2 str3 str*)))))
 
 
 ;;;; folding functions
@@ -422,8 +423,8 @@
 	  (loop i+1 (+ 1 i+1)
 		(combine knil (string-ref vec i))))))))
 
-(define ($string-fold-left/2 combine knil vec1 vec2)
-  (let ((vec.len (string-length vec1)))
+(define ($string-fold-left/2 combine knil str1 str2)
+  (let ((vec.len (string-length str1)))
     (if (zero? vec.len)
 	knil
       (let loop ((i	0)
@@ -431,12 +432,12 @@
 		 (knil	knil))
 	(if (= i+1 vec.len)
 	    ;;Last call to COMBINE is in tail position.
-	    (combine knil (string-ref vec1 i) (string-ref vec2 i))
+	    (combine knil (string-ref str1 i) (string-ref str2 i))
 	  (loop i+1 (+ 1 i+1)
-		(combine knil (string-ref vec1 i) (string-ref vec2 i))))))))
+		(combine knil (string-ref str1 i) (string-ref str2 i))))))))
 
-(define ($string-fold-left/3 combine knil vec1 vec2 vec3)
-  (let ((vec.len (string-length vec1)))
+(define ($string-fold-left/3 combine knil str1 str2 str3)
+  (let ((vec.len (string-length str1)))
     (if (zero? vec.len)
 	knil
       (let loop ((i	0)
@@ -444,12 +445,12 @@
 		 (knil	knil))
 	(if (= i+1 vec.len)
 	    ;;Last call to COMBINE is in tail position.
-	    (combine knil (string-ref vec1 i) (string-ref vec2 i) (string-ref vec3 i))
+	    (combine knil (string-ref str1 i) (string-ref str2 i) (string-ref str3 i))
 	  (loop i+1 (+ 1 i+1)
-		(combine knil (string-ref vec1 i) (string-ref vec2 i) (string-ref vec3 i))))))))
+		(combine knil (string-ref str1 i) (string-ref str2 i) (string-ref str3 i))))))))
 
-(define ($string-fold-left/list combine knil vec*)
-  (let ((vec.len (string-length (car vec*))))
+(define ($string-fold-left/list combine knil str*)
+  (let ((vec.len (string-length (car str*))))
     (if (zero? vec.len)
 	knil
       (let loop ((i	0)
@@ -459,11 +460,11 @@
 	    ;;Last call to COMBINE is in tail position.
 	    (apply combine knil ($map/1 (lambda (vec)
 					  (string-ref vec i))
-				  vec*))
+				  str*))
 	  (loop i+1 (+ 1 i+1)
 		(apply combine knil ($map/1 (lambda (vec)
 					      (string-ref vec i))
-				      vec*))))))))
+				      str*))))))))
 
 ;;; --------------------------------------------------------------------
 
@@ -478,31 +479,31 @@
 	    (combine (string-ref vec i) knil)
 	  (loop (sub1 i) (combine (string-ref vec i) knil)))))))
 
-(define ($string-fold-right/2 combine knil vec1 vec2)
-  (let ((vec.len (string-length vec1)))
+(define ($string-fold-right/2 combine knil str1 str2)
+  (let ((vec.len (string-length str1)))
     (if (zero? vec.len)
 	knil
       (let loop ((i	(sub1 vec.len))
 		 (knil	knil))
 	(if (zero? i)
 	    ;;Last call to COMBINE is in tail position.
-	    (combine (string-ref vec1 i) (string-ref vec2 i) knil)
-	  (loop (sub1 i) (combine (string-ref vec1 i) (string-ref vec2 i) knil)))))))
+	    (combine (string-ref str1 i) (string-ref str2 i) knil)
+	  (loop (sub1 i) (combine (string-ref str1 i) (string-ref str2 i) knil)))))))
 
-(define ($string-fold-right/3 combine knil vec1 vec2 vec3)
-  (let ((vec.len (string-length vec1)))
+(define ($string-fold-right/3 combine knil str1 str2 str3)
+  (let ((vec.len (string-length str1)))
     (if (zero? vec.len)
 	knil
       (let loop ((i	(sub1 vec.len))
 		 (knil	knil))
 	(if (zero? i)
 	    ;;Last call to COMBINE is in tail position.
-	    (combine (string-ref vec1 i) (string-ref vec2 i) (string-ref vec3 i) knil)
+	    (combine (string-ref str1 i) (string-ref str2 i) (string-ref str3 i) knil)
 	  (loop (sub1 i)
-		(combine (string-ref vec1 i) (string-ref vec2 i) (string-ref vec3 i) knil)))))))
+		(combine (string-ref str1 i) (string-ref str2 i) (string-ref str3 i) knil)))))))
 
-(define ($string-fold-right/list combine knil vec*)
-  (let ((vec.len (string-length (car vec*))))
+(define ($string-fold-right/list combine knil str*)
+  (let ((vec.len (string-length (car str*))))
     (if (zero? vec.len)
 	knil
       (let loop ((i	(sub1 vec.len))
@@ -511,12 +512,12 @@
 	    ;;Last call to COMBINE is in tail position.
 	    (apply combine (append ($map/1 (lambda (vec)
 					     (string-ref vec i))
-				     vec*)
+				     str*)
 				   (list knil)))
 	  (loop (sub1 i)
 		(apply combine (append ($map/1 (lambda (vec)
 						 (string-ref vec i))
-					 vec*)
+					 str*)
 				       (list knil)))))))))
 
 ;;; --------------------------------------------------------------------
@@ -544,29 +545,29 @@
 			   (add1 idx))
       0 vec.in)))
 
-(define ($string-map/2 func vec1 vec2)
+(define ($string-map/2 func str1 str2)
   (receive-and-return (vec.out)
-      (make-string (string-length vec1))
+      (make-string (string-length str1))
     ($string-fold-left/2 (lambda (idx item1 item2)
 			   (string-set! vec.out idx (func item1 item2))
 			   (add1 idx))
-      0 vec1 vec2)))
+      0 str1 str2)))
 
-(define ($string-map/3 func vec1 vec2 vec3)
+(define ($string-map/3 func str1 str2 str3)
   (receive-and-return (vec.out)
-      (make-string (string-length vec1))
+      (make-string (string-length str1))
     ($string-fold-left/3 (lambda (idx item1 item2 item3)
 			   (string-set! vec.out idx (func item1 item2 item3))
 			   (add1 idx))
-      0 vec1 vec2 vec3)))
+      0 str1 str2 str3)))
 
-(define ($string-map/list func vec*)
+(define ($string-map/list func str*)
   (receive-and-return (vec.out)
-      (make-string (string-length (car vec*)))
+      (make-string (string-length (car str*)))
     ($string-fold-left/list (lambda (idx . item*)
 			      (string-set! vec.out idx (apply func item*))
 			      (add1 idx))
-      0 vec*)))
+      0 str*)))
 
 ;;; --------------------------------------------------------------------
 
@@ -576,23 +577,23 @@
 			 (add1 idx))
     0 vec))
 
-(define ($string-for-each/2 func vec1 vec2)
+(define ($string-for-each/2 func str1 str2)
   ($string-fold-left/2 (lambda (idx item1 item2)
 			 (func item1 item2)
 			 (add1 idx))
-    0 vec1 vec2))
+    0 str1 str2))
 
-(define ($string-for-each/3 func vec1 vec2 vec3)
+(define ($string-for-each/3 func str1 str2 str3)
   ($string-fold-left/3 (lambda (idx item1 item2 item3)
 			 (func item1 item2 item3)
 			 (add1 idx))
-    0 vec1 vec2 vec3))
+    0 str1 str2 str3))
 
-(define ($string-for-each/list func vec*)
+(define ($string-for-each/list func str*)
   ($string-fold-left/list (lambda (idx . item*)
 			    (apply func item*)
 			    (add1 idx))
-    0 vec*))
+    0 str*))
 
 ;;; --------------------------------------------------------------------
 
@@ -645,29 +646,29 @@
 			   (add1 idx))
       0 vec.in)))
 
-(define ($string-map-index/2 func vec1 vec2)
+(define ($string-map-index/2 func str1 str2)
   (receive-and-return (vec.out)
-      (make-string (string-length vec1))
+      (make-string (string-length str1))
     ($string-fold-left/2 (lambda (idx item1 item2)
 			   (string-set! vec.out idx (func idx item1 item2))
 			   (add1 idx))
-      0 vec1 vec2)))
+      0 str1 str2)))
 
-(define ($string-map-index/3 func vec1 vec2 vec3)
+(define ($string-map-index/3 func str1 str2 str3)
   (receive-and-return (vec.out)
-      (make-string (string-length vec1))
+      (make-string (string-length str1))
     ($string-fold-left/3 (lambda (idx item1 item2 item3)
 			   (string-set! vec.out idx (func idx item1 item2 item3))
 			   (add1 idx))
-      0 vec1 vec2 vec3)))
+      0 str1 str2 str3)))
 
-(define ($string-map-index/list func vec*)
+(define ($string-map-index/list func str*)
   (receive-and-return (vec.out)
-      (make-string (string-length (car vec*)))
+      (make-string (string-length (car str*)))
     ($string-fold-left/list (lambda (idx . item*)
 			      (string-set! vec.out idx (apply func idx item*))
 			      (add1 idx))
-      0 vec*)))
+      0 str*)))
 
 ;;; --------------------------------------------------------------------
 
@@ -677,23 +678,23 @@
 			 (add1 idx))
     0 vec))
 
-(define ($string-for-each-index/2 func vec1 vec2)
+(define ($string-for-each-index/2 func str1 str2)
   ($string-fold-left/2 (lambda (idx item1 item2)
 			 (func idx item1 item2)
 			 (add1 idx))
-    0 vec1 vec2))
+    0 str1 str2))
 
-(define ($string-for-each-index/3 func vec1 vec2 vec3)
+(define ($string-for-each-index/3 func str1 str2 str3)
   ($string-fold-left/3 (lambda (idx item1 item2 item3)
 			 (func idx item1 item2 item3)
 			 (add1 idx))
-    0 vec1 vec2 vec3))
+    0 str1 str2 str3))
 
-(define ($string-for-each-index/list func vec*)
+(define ($string-for-each-index/list func str*)
   ($string-fold-left/list (lambda (idx . item*)
 			    (apply func idx item*)
 			    (add1 idx))
-    0 vec*))
+    0 str*))
 
 ;;; --------------------------------------------------------------------
 
@@ -721,32 +722,32 @@
 				 (escape #f)))
 	  #t vec))))
 
-(define ($string-for-all/2 pred vec1 vec2)
+(define ($string-for-all/2 pred str1 str2)
   (call/cc
       (lambda (escape)
 	($string-fold-left/2 (lambda (knil item1 item2)
 			       (if (pred item1 item2)
 				   knil
 				 (escape #f)))
-	  #t vec1 vec2))))
+	  #t str1 str2))))
 
-(define ($string-for-all/3 pred vec1 vec2 vec3)
+(define ($string-for-all/3 pred str1 str2 str3)
   (call/cc
       (lambda (escape)
 	($string-fold-left/3 (lambda (knil item1 item2 item3)
 			       (if (pred item1 item2 item3)
 				   knil
 				 (escape #f)))
-	  #t vec1 vec2 vec3))))
+	  #t str1 str2 str3))))
 
-(define ($string-for-all/list pred vec*)
+(define ($string-for-all/list pred str*)
   (call/cc
       (lambda (escape)
 	($string-fold-left/list (lambda (knil . item*)
 				  (if (apply pred item*)
 				      knil
 				    (escape #f)))
-	  #t vec*))))
+	  #t str*))))
 
 ;;; --------------------------------------------------------------------
 
@@ -760,7 +761,7 @@
 				      knil)))
 	  #f vec))))
 
-(define ($string-exists/2 pred vec1 vec2)
+(define ($string-exists/2 pred str1 str2)
   (call/cc
       (lambda (escape)
 	($string-fold-left/2 (lambda (knil item1 item2)
@@ -768,9 +769,9 @@
 				      => escape)
 				     (else
 				      knil)))
-	  #f vec1 vec2))))
+	  #f str1 str2))))
 
-(define ($string-exists/3 pred vec1 vec2 vec3)
+(define ($string-exists/3 pred str1 str2 str3)
   (call/cc
       (lambda (escape)
 	($string-fold-left/3 (lambda (knil item1 item2 item3)
@@ -778,9 +779,9 @@
 				      => escape)
 				     (else
 				      knil)))
-	  #f vec1 vec2 vec3))))
+	  #f str1 str2 str3))))
 
-(define ($string-exists/list pred vec*)
+(define ($string-exists/list pred str*)
   (call/cc
       (lambda (escape)
 	($string-fold-left/list (lambda (knil . item*)
@@ -788,7 +789,7 @@
 					 => escape)
 					(else
 					 knil)))
-	  #f vec*))))
+	  #f str*))))
 
 ;;; --------------------------------------------------------------------
 

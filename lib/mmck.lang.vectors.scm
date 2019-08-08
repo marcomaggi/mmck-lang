@@ -149,6 +149,7 @@
 	  (only (mmck lang lists)
 		cons*
 		$fold-left/1
+		$for-all/1
 		$map/1)
 	  (mmck exceptional-conditions))
 
@@ -310,7 +311,7 @@
    (condition (make-vectors-are-of-different-length-condition)
 	      (make-who-condition who)
 	      (make-message-condition "invalid arguments, vectors are of different length")
-	      (make-irritants-condition (vector vector-of-vectors)))))
+	      (make-irritants-condition (list vector-of-vectors)))))
 
 ;;; --------------------------------------------------------------------
 
@@ -324,7 +325,7 @@
    (condition (make-vector-is-empty-condition)
 	      (make-who-condition who)
 	      (make-message-condition "invalid operand, expected non-empty vector")
-	      (make-irritants-condition (vector obj)))))
+	      (make-irritants-condition (list obj)))))
 
 ;;; --------------------------------------------------------------------
 
@@ -338,7 +339,7 @@
    (condition (make-vectors-are-empty-or-of-different-length-condition)
 	      (make-who-condition who)
 	      (make-message-condition "invalid arguments, vectors are empty or of different length")
-	      (make-irritants-condition (vector vector-of-vectors)))))
+	      (make-irritants-condition (list vector-of-vectors)))))
 
 
 ;;;; constructors
@@ -415,13 +416,13 @@
    (and (vector? vec1)
 	(vector? vec2)
 	(vector? vec3)
-	(= (vector-length vec1)
-	   (vector-length vec2)
-	   (vector-length vec3))
-	($vector-for-all/1 (lambda (knil vec)
-			     (= knil (vector-length vec)))
-			   (vector-length vec1)
-			   vec*)))
+	(let ((vec.len (vector-length vec1)))
+	  (and (= vec.len
+		  (vector-length vec2)
+		  (vector-length vec3))
+	       ($for-all/1 (lambda (vec)
+			     (= vec.len (vector-length vec)))
+		 vec*)))))
   #| end of CASE-DEFINE |# )
 
 
@@ -430,10 +431,10 @@
 (case-define assert-vectors-of-equal-length
   ((who vec1 vec2)
    (unless (vectors-of-equal-length? vec1 vec2)
-     (raise-exception-vectors-are-of-different-length who (vector vec1 vec2))))
+     (raise-exception-vectors-are-of-different-length who (list vec1 vec2))))
   ((who vec1 vec2 vec3)
    (unless (vectors-of-equal-length? vec1 vec2 vec3)
-     (raise-exception-vectors-are-of-different-length who (vector vec1 vec2 vec3))))
+     (raise-exception-vectors-are-of-different-length who (list vec1 vec2 vec3))))
   ((who vec1 vec2 vec3 vec*)
    (unless (list-of-vectors-of-equal-length? (cons* vec1 vec2 vec3 vec*))
      (raise-exception-vectors-are-of-different-length who (cons* vec1 vec2 vec3 vec*)))))

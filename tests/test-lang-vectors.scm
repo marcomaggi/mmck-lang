@@ -100,6 +100,12 @@
   (check-for-false	(list-of-vectors-of-equal-length? '(#(a) (b))))
   (check-for-false	(list-of-vectors-of-equal-length? '(#(a) #(a b))))
 
+  (check-for-true	(list-of-vectors-of-equal-length? '(#(a) #(b) #(c))))
+  (check-for-false	(list-of-vectors-of-equal-length? '(#(a) #(a b) #(c))))
+
+  (check-for-true	(list-of-vectors-of-equal-length? '(#(a) #(b) #(c) #(d))))
+  (check-for-false	(list-of-vectors-of-equal-length? '(#(a) #(a) #(c) #(d 99))))
+
 ;;; --------------------------------------------------------------------
 
   (check-for-true	(vectors-of-equal-length? '#()))
@@ -108,6 +114,12 @@
 
   (check-for-false	(vectors-of-equal-length? '#(a) '(b)))
   (check-for-false	(vectors-of-equal-length? '#(a) '#(a b)))
+
+  (check-for-true	(vectors-of-equal-length? '#(a) '#(b) '#(c)))
+  (check-for-false	(vectors-of-equal-length? '#(a) '#(a b) '#(c)))
+
+  (check-for-true	(vectors-of-equal-length? '#(a) '#(b) '#(c) '#(d)))
+  (check-for-false	(vectors-of-equal-length? '#(a) '#(a) '#(c) '#(d 99)))
 
   (values))
 
