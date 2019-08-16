@@ -320,56 +320,6 @@ lib/mmck.lang.booleans.import.$(MMCK_SOEXT): lib/mmck.lang.booleans.import.scm
 	$(MMCK_LIB_ENV) $(CSC_COMPILE_LIBRARY) $(@) $(<)
 
 
-#### library (mmck lang): module lists
-
-MMCK_LANG_MODULES		+= lib/mmck.lang.lists.scm
-MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.lists.$(OBJEXT)
-MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.lists.import.scm
-MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.lists.import.$(MMCK_SOEXT)
-MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.lists.import.$(MMCK_SOEXT)
-MMCK_LANG_TEMP_FILES		+= \
-	lib/mmck.lang.lists.temp	\
-	lib/mmck.lang.lists.lock	\
-	lib/mmck.lang.lists.stamp
-
-MMCK_LANG_LISTS_DEPS = \
-	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
-	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
-	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
-	$(MMCK_OBJECTS_DEPS)
-
-lib/mmck.lang.lists.stamp: lib/mmck.lang.lists.scm $(MMCK_LANG_LISTS_DEPS)
-	@rm -f lib/mmck.lang.lists.temp
-	@touch lib/mmck.lang.lists.temp
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.lists.$(OBJEXT) $(<)
-	@$(MV) mmck.lang.lists.import.scm lib/mmck.lang.lists.import.scm
-	@mv -f lib/mmck.lang.lists.temp $@
-
-lib/mmck.lang.lists.import.scm lib/mmck.lang.lists.$(OBJEXT): lib/mmck.lang.lists.stamp
-	@dry=; for f in x $$MAKEFLAGS; do \
-	  case $$f in \
-	    *=*|--*);; \
-	    *n*) dry=:;; \
-	  esac; \
-	done; \
-	if test -f $@; then :; else \
-	  $$dry trap 'rm -rf lib/mmck.lang.lists.lock lib/mmck.lang.lists.stamp' 1 2 13 15; \
-	  if $$dry mkdir lib/mmck.lang.lists.lock 2>/dev/null; then \
-	    $$dry rm -f lib/mmck.lang.lists.stamp; \
-	    $(MAKE) $(AM_MAKEFLAGS) lib/mmck.lang.lists.stamp; \
-	    $$dry rmdir lib/mmck.lang.lists.lock; \
-	  else \
-	    while test -d lib/mmck.lang.lists.lock && test -z "$$dry"; do \
-	      sleep 1; \
-	    done; \
-	    $$dry test -f lib/mmck.lang.lists.stamp; exit $$?; \
-	  fi; \
-	fi
-
-lib/mmck.lang.lists.import.$(MMCK_SOEXT): lib/mmck.lang.lists.import.scm
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_LIBRARY) $(@) $(<)
-
-
 #### library (mmck lang): module vectors
 
 MMCK_LANG_MODULES		+= lib/mmck.lang.vectors.scm
@@ -385,7 +335,6 @@ MMCK_LANG_TEMP_FILES		+= \
 MMCK_LANG_VECTORS_DEPS = \
 	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
-	lib/mmck.lang.lists.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
 	$(MMCK_OBJECTS_DEPS)
 
@@ -436,7 +385,6 @@ MMCK_LANG_TEMP_FILES		+= \
 MMCK_LANG_STRINGS_DEPS = \
 	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
-	lib/mmck.lang.lists.import.$(MMCK_SOEXT)	\
 	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
 	$(MMCK_OBJECTS_DEPS)
 
@@ -612,18 +560,6 @@ tests/test-lang-booleans.$(OBJEXT): tests/test-lang-booleans.scm $(MMCK_CHECK_DE
 	$(MMCK_CHECK_ENV) $(CSC_COMPILE_OBJECT_STATIC) $(@) $(<)
 
 tests/test-lang-booleans.exe: tests/test-lang-booleans.$(OBJEXT)
-	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
-
-## --------------------------------------------------------------------
-
-EXTRA_DIST		+= tests/test-lang-lists.scm
-MMCK_CHECK_OBJECTS	+= tests/test-lang-lists.$(OBJEXT)
-MMCK_CHECK_PROGS	+= tests/test-lang-lists.exe
-
-tests/test-lang-lists.$(OBJEXT): tests/test-lang-lists.scm $(MMCK_CHECK_DEPS)
-	$(MMCK_CHECK_ENV) $(CSC_COMPILE_OBJECT_STATIC) $(@) $(<)
-
-tests/test-lang-lists.exe: tests/test-lang-lists.$(OBJEXT)
 	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
 
 ## --------------------------------------------------------------------

@@ -29,7 +29,6 @@
 	 (uses mmck.lang.debug)
 	 (uses mmck.lang.core)
 	 (uses mmck.lang.assertions)
-	 (uses mmck.lang.lists)
 	 (emit-import-library mmck.lang.vectors))
 
 (module (mmck.lang.vectors)
@@ -146,12 +145,62 @@
 	  (mmck lang debug)
 	  (mmck lang core)
 	  (mmck lang assertions)
-	  (only (mmck lang lists)
-		cons*
-		$fold-left/1
-		$for-all/1
-		$map/1)
 	  (mmck exceptional-conditions))
+
+
+;;;; lists handling
+
+(case-define cons*
+  ((item)
+   item)
+  ((item ell)
+   (cons item ell))
+  ((item1 item2 ell)
+   (cons item1 (cons item2 ell)))
+  ((item . rest)
+   (let loop ((item	item)
+	      (rest	rest))
+     (if (null? rest)
+	 item
+       (cons item (loop (car rest) (cdr rest)))))))
+
+(define ($for-all/1 pred ell)
+  (or (null? ell)
+      (if (null? (cdr ell))
+	  ;;Perform a tail call for the last item.
+	  (if (pred (car ell))
+	      #t
+	    #f)
+	(and (pred (car ell))
+	     ($for-all/1 pred (cdr ell))))))
+
+(define ($fold-left/1 combine knil ell)
+  ;;NOTE Let's avoid doing this with a non-tail recursion!!!
+  ;;
+  (if (pair? ell)
+      (if (null? (cdr ell))
+	  ;;Perform a tail call to COMBINE for the last element.
+	  (combine knil (car ell))
+	($fold-left/1 combine (combine knil (car ell)) (cdr ell)))
+    knil))
+
+(define ($fold-right/1 combine knil ell)
+  ;;NOTE Let's avoid doing this with a non-tail recursion!!!
+  ;;
+  (let loop ((knil	knil)
+	     (rev-ell	(reverse ell)))
+    (if (pair? rev-ell)
+	(if (null? (cdr rev-ell))
+	    ;;Perform a tail call to COMBINE for the last element.
+	    (combine (car rev-ell) knil)
+	  (loop (combine (car rev-ell) knil)
+		(cdr rev-ell)))
+      knil)))
+
+(define ($map/1 func ell)
+  ($fold-right/1 (lambda (item nil)
+		   (cons (func item) nil))
+    '() ell))
 
 
 ;;;; unsafe operations
