@@ -320,56 +320,6 @@ lib/mmck.lang.booleans.import.$(MMCK_SOEXT): lib/mmck.lang.booleans.import.scm
 	$(MMCK_LIB_ENV) $(CSC_COMPILE_LIBRARY) $(@) $(<)
 
 
-#### library (mmck lang): module vectors
-
-MMCK_LANG_MODULES		+= lib/mmck.lang.vectors.scm
-MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.vectors.$(OBJEXT)
-MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.vectors.import.scm
-MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.vectors.import.$(MMCK_SOEXT)
-MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.vectors.import.$(MMCK_SOEXT)
-MMCK_LANG_TEMP_FILES		+= \
-	lib/mmck.lang.vectors.temp	\
-	lib/mmck.lang.vectors.lock	\
-	lib/mmck.lang.vectors.stamp
-
-MMCK_LANG_VECTORS_DEPS = \
-	lib/mmck.lang.debug.import.$(MMCK_SOEXT)	\
-	lib/mmck.lang.core.import.$(MMCK_SOEXT)		\
-	lib/mmck.lang.assertions.import.$(MMCK_SOEXT)	\
-	$(MMCK_OBJECTS_DEPS)
-
-lib/mmck.lang.vectors.stamp: lib/mmck.lang.vectors.scm $(MMCK_LANG_VECTORS_DEPS)
-	@rm -f lib/mmck.lang.vectors.temp
-	@touch lib/mmck.lang.vectors.temp
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.vectors.$(OBJEXT) $(<)
-	@$(MV) mmck.lang.vectors.import.scm lib/mmck.lang.vectors.import.scm
-	@mv -f lib/mmck.lang.vectors.temp $@
-
-lib/mmck.lang.vectors.import.scm lib/mmck.lang.vectors.$(OBJEXT): lib/mmck.lang.vectors.stamp
-	@dry=; for f in x $$MAKEFLAGS; do \
-	  case $$f in \
-	    *=*|--*);; \
-	    *n*) dry=:;; \
-	  esac; \
-	done; \
-	if test -f $@; then :; else \
-	  $$dry trap 'rm -rf lib/mmck.lang.vectors.lock lib/mmck.lang.vectors.stamp' 1 2 13 15; \
-	  if $$dry mkdir lib/mmck.lang.vectors.lock 2>/dev/null; then \
-	    $$dry rm -f lib/mmck.lang.vectors.stamp; \
-	    $(MAKE) $(AM_MAKEFLAGS) lib/mmck.lang.vectors.stamp; \
-	    $$dry rmdir lib/mmck.lang.vectors.lock; \
-	  else \
-	    while test -d lib/mmck.lang.vectors.lock && test -z "$$dry"; do \
-	      sleep 1; \
-	    done; \
-	    $$dry test -f lib/mmck.lang.vectors.stamp; exit $$?; \
-	  fi; \
-	fi
-
-lib/mmck.lang.vectors.import.$(MMCK_SOEXT): lib/mmck.lang.vectors.import.scm
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_LIBRARY) $(@) $(<)
-
-
 #### library (mmck lang): module strings
 
 MMCK_LANG_MODULES		+= lib/mmck.lang.strings.scm
@@ -560,18 +510,6 @@ tests/test-lang-booleans.$(OBJEXT): tests/test-lang-booleans.scm $(MMCK_CHECK_DE
 	$(MMCK_CHECK_ENV) $(CSC_COMPILE_OBJECT_STATIC) $(@) $(<)
 
 tests/test-lang-booleans.exe: tests/test-lang-booleans.$(OBJEXT)
-	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
-
-## --------------------------------------------------------------------
-
-EXTRA_DIST		+= tests/test-lang-vectors.scm
-MMCK_CHECK_OBJECTS	+= tests/test-lang-vectors.$(OBJEXT)
-MMCK_CHECK_PROGS	+= tests/test-lang-vectors.exe
-
-tests/test-lang-vectors.$(OBJEXT): tests/test-lang-vectors.scm $(MMCK_CHECK_DEPS)
-	$(MMCK_CHECK_ENV) $(CSC_COMPILE_OBJECT_STATIC) $(@) $(<)
-
-tests/test-lang-vectors.exe: tests/test-lang-vectors.$(OBJEXT)
 	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
 
 ## --------------------------------------------------------------------
