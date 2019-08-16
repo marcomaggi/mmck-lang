@@ -35,7 +35,6 @@
 	 (uses mmck.lang.core)
 	 (uses mmck.lang.assertions)
 	 (uses mmck.lang.booleans)
-	 (uses mmck.lang.strings)
 	 (uses mmck.lang.version)
 	 (emit-import-library mmck.lang))
 
@@ -46,7 +45,6 @@
   (reexport (mmck.lang.assertions))
   (reexport (mmck.lang.core))
   (reexport (mmck.lang.booleans))
-  (reexport (mmck.lang.strings))
   (reexport (mmck.lang.version))
   #| end of module |# )
 
