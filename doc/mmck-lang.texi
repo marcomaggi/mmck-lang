@@ -991,7 +991,7 @@ Usage example:
 (define* (the-func arg*)
   (begin-checks
     (assert-argument-list-of-type (__who__)
-      "list of strings" string? arg* 1))
+      "string" string? arg* 1))
   #t)
 
 (try
@@ -1003,8 +1003,57 @@ Usage example:
            (condition-irritants E)))
     (else E)))
 @result{} (the-func
-    "expected item of type \"list of strings\" at index 1 of list argument 1"
-    (hello))
+    "expected item of type \"string\" at index 1 of list argument 1"
+    (("ciao" hello "salut") hello))
+@end lisp
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@defun assert-argument-vector-of-type @var{who} @var{type-desr} @var{type-pred} @var{arg-vec} @var{arg-idx}
+Raise an assertion with compound exceptional--condition object having components:
+@condition{assertion}, @condition{who}, @condition{message}, @condition{irritants}.  This function
+is meant to be used to signal a type violation for the argument of a function that is expected to be
+a vector.
+
+@table @asis
+@item @var{who}
+Must be a the argument for @func{make-who-condition} (symbol or string or @false{}) representing the
+name of the function raising the assertion.
+
+@item @var{type-descr}
+Must be a string describing the expected type of objects in the vector.
+
+@item @var{type-pred}
+Must be a predicate used to validate the objects in the vector.
+
+@item @var{arg-vec}
+Must be the vector argument to validate.
+
+@item @var{arg-idx}
+Must be a fixnum one--based index of the argument in the tuple of arguments.
+@end table
+
+Usage example:
+
+@lisp
+(define* (the-func arg)
+  (begin-checks
+    (assert-argument-vector-of-type (__who__)
+      "string" string? arg 1))
+  #t)
+
+(try
+    (the-func '#("ciao" hello "salut"))
+  (catch E
+    ((&assertion)
+     (list (condition-who E)
+           (condition-message E)
+           (condition-irritants E)))
+    (else E)))
+@result{} (the-func
+    "expected item of type \"string\" at index 1 of vector argument 1"
+    (#("ciao" hello "salut") hello))
 @end lisp
 @end defun
 

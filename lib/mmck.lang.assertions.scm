@@ -112,6 +112,13 @@
 
 (: assert-argument-list-of-type  (<&who-condition-argument> <type-description> <type-predicate> list <argument-index> -> undefined))
 (define (assert-argument-list-of-type who type-descr type-pred arg* arg.idx)
+  (unless (list? arg*)
+    (assertion-violation who
+      (string-append "expected list of \""
+		     type-descr
+		     "\" as argument at index "
+		     (number->string arg.idx))
+      arg*))
   (fold-left (lambda (item.idx item)
 	       (if (type-pred item)
 		   (+ 1 item.idx)
@@ -119,7 +126,7 @@
 		   (string-append "expected item of type \"" type-descr "\""
 				  " at index " (number->string item.idx)
 				  " of list argument " (number->string arg.idx))
-		   item)))
+		   arg* item)))
     0 arg*))
 
 (: assert-argument-vector-of-type (<&who-condition-argument> <type-description> <type-predicate> vector <argument-index> -> undefined))
@@ -137,7 +144,7 @@
       (assertion-violation who
 	(string-append "expected item of type \"" type-descr "\""
 		       " at index " (number->string i)
-		       " of list argument " )
+		       " of vector argument " (number->string arg.idx))
 	arg-vec
 	(vector-ref arg-vec i)))))
 

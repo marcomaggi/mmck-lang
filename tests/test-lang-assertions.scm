@@ -129,7 +129,7 @@
 
   (define* (the-func arg*)
     (begin-checks
-      (assert-argument-list-of-type (__who__) "list of strings" string? arg* 1))
+      (assert-argument-list-of-type (__who__) "string" string? arg* 1))
     #t)
 
 ;;; --------------------------------------------------------------------
@@ -156,8 +156,46 @@
 		   (condition-message E)
 		   (condition-irritants E)))
 	  (else E)))
-    => '#(the-func "expected item of type \"list of strings\" at index 1 of list argument 1"
-		   (hello)))
+    => '#(the-func "expected item of type \"string\" at index 1 of list argument 1"
+		   (("ciao" hello "salut") hello)))
+
+  (values))
+
+
+(parameterise ((check-test-name		'vector-argument-type))
+
+  (define* (the-func arg-vec)
+    (begin-checks
+      (assert-argument-vector-of-type (__who__) "string" string? arg-vec 1))
+    #t)
+
+;;; --------------------------------------------------------------------
+
+  ;;Assertion success.
+  ;;
+  (check
+      (try
+	  (the-func '#("ciao" "hello"))
+	(catch E
+	  ((&assertion)
+	   #f)
+	  (else E)))
+    => #t)
+
+  ;;Assertion failure.
+  ;;
+  (check
+      (try
+	  (the-func '#("ciao" hello "salut"))
+	(catch E
+	  ((&assertion)
+	   (vector (condition-who E)
+		   (condition-message E)
+		   (condition-irritants E)))
+	  (else E)))
+    => '#(the-func "expected item of type \"string\" at index 1 of vector argument 1"
+		   (#("ciao" hello "salut")
+		    hello)))
 
   (values))
 
