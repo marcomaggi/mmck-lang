@@ -163,6 +163,7 @@ included in the section entitled ``@gnu{} Free Documentation License''.
 * expr::                        Expression syntaxes.
 * booleans::                    Boolean functions.
 * parameters::                  Parameter functions and syntaxes.
+* assertions::                  Raising assertions.
 
 Appendices
 
@@ -842,6 +843,166 @@ syntactic binding @syntax{parameterise} is an alias for @syntax{parameterize}.
 @defun make-parameter @var{obj}
 @defunx make-parameter @var{obj} @var{guard}
 Build a new parameter.  It is reexported from @library{chicken base}.
+@end defun
+
+@c page
+@node assertions
+@chapter Raising assertions
+
+
+The assertions @api{} documented in this chapter is built upon the exceptional--condition object
+defined by the library @MMCKExceptionalConditionsRef{Top, @mmck{} Exceptional Conditions}.
+
+@menu
+* assertions types::            Raising assertions for type violations.
+@end menu
+
+@c page
+@node assertions types
+@section Raising assertions for type violations
+
+
+@defun assert-argument-type @var{who} @var{type-descr} @var{type-pred} @var{arg} @var{arg-idx}
+Raise an assertion with compound exceptional--condition object having components:
+@condition{assertion}, @condition{who}, @condition{message}, @condition{irritants}.  This function
+is meant to be used to signal a type violation for the argument of a function.
+
+@table @asis
+@item @var{who}
+Must be a the argument for @func{make-who-condition} (symbol or string or @false{}) representing the
+name of the function raising the assertion.
+
+@item @var{type-descr}
+Must be a string describing the expected argument type.
+
+@item @var{type-pred}
+Must be a predicate used to validate the argument.
+
+@item @var{arg}
+Must be the argument to validate.
+
+@item @var{arg-idx}
+Must be a fixnum one--based index of the argument in the tuple of arguments.
+@end table
+
+Usage example:
+
+@lisp
+(define* (the-func arg)
+  (assert-argument-type (__who__) "this-type" string? arg 1)
+  #t)
+
+(try
+    (the-func 123)
+  (catch E
+    ((&assertion)
+     (list (condition-who E)
+           (condition-message E)
+           (condition-irritants E)))
+    (else E)))
+@result{} (the-func "expected argument 1 of type \"this-type\"" (123))
+@end lisp
+@end defun
+
+
+@defun assert-argument-type/rest @var{who} @var{type-descr} @var{type-pred} @var{rest-arg}
+Raise an assertion with compound exceptional--condition object having components:
+@condition{assertion}, @condition{who}, @condition{message}, @condition{irritants}.  This function
+is meant to be used to signal a type violation for the ``rest'' argument of a function.
+
+@table @asis
+@item @var{who}
+Must be a the argument for @func{make-who-condition} (symbol or string or @false{}) representing the
+name of the function raising the assertion.
+
+@item @var{type-descr}
+Must be a string describing the expected argument type.
+
+@item @var{type-pred}
+Must be a predicate used to validate the rest argument.
+
+@item @var{rest-arg}
+Must be the rest argument to validate.
+@end table
+
+Usage example:
+
+@lisp
+(define (list-of-strings? obj)
+  (and (list? obj)
+       (call/cc
+           (lambda (escape)
+             (foldl (lambda (knil item)
+                      (or (string? item)
+                          (escape #f)))
+                    #t
+                    obj)))))
+
+(define* (the-func arg . rest)
+  (assert-argument-type/rest (__who__)
+    "this-type" list-of-strings? rest)
+  #t)
+
+(try
+    (the-func 123 "ciao" 'hello "salut")
+  (catch E
+    ((&assertion)
+     (list (condition-who E)
+           (condition-message E)
+           (condition-irritants E)))
+    (else E)))
+@result{} (the-func
+    "expected rest argument of type \"this-type\""
+    (("ciao" hello "salut")))
+@end lisp
+@end defun
+
+@c ------------------------------------------------------------------------
+
+@defun assert-argument-list-of-type @var{who} @var{type-desr} @var{type-pred} @var{arg*} @var{arg-idx}
+Raise an assertion with compound exceptional--condition object having components:
+@condition{assertion}, @condition{who}, @condition{message}, @condition{irritants}.  This function
+is meant to be used to signal a type violation for the argument of a function that is expected to be
+a list.
+
+@table @asis
+@item @var{who}
+Must be a the argument for @func{make-who-condition} (symbol or string or @false{}) representing the
+name of the function raising the assertion.
+
+@item @var{type-descr}
+Must be a string describing the expected type of objects in the list.
+
+@item @var{type-pred}
+Must be a predicate used to validate the objects in the list.
+
+@item @var{arg*}
+Must be the list argument to validate.
+
+@item @var{arg-idx}
+Must be a fixnum one--based index of the argument in the tuple of arguments.
+@end table
+
+Usage example:
+
+@lisp
+(define* (the-func arg*)
+  (assert-argument-list-of-type (__who__)
+    "list of strings" string? arg* 1)
+  #t)
+
+(try
+    (the-func '("ciao" hello "salut"))
+  (catch E
+    ((&assertion)
+     (list (condition-who E)
+           (condition-message E)
+           (condition-irritants E)))
+    (else E)))
+@result{} (the-func
+    "expected item of type \"list of strings\" at index 1 of list argument 1"
+    (hello))
+@end lisp
 @end defun
 
 @c page

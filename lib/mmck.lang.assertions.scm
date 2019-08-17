@@ -31,8 +31,7 @@
 	 (emit-import-library mmck.lang.assertions))
 
 (module (mmck.lang.assertions)
-    ((syntax: assert* assertion-violation)
-     assert-argument-type
+    (assert-argument-type
      assert-argument-type/rest
      assert-argument-list-of-type
      assert-argument-vector-of-type)
@@ -41,6 +40,9 @@
 		unless)
 	  (only (chicken format)
 		format)
+	  (only (chicken type)
+		:
+		define-type)
 	  (mmck lang debug)
 	  (mmck lang core)
 	  (mmck exceptional-conditions))
@@ -55,31 +57,32 @@
 
 ;;;; helpers
 
+(: fold-left ((procedure (* *) . (*)) * list -> *))
 (define (fold-left combine nil ell)
   (if (pair? ell)
       (fold-left combine (combine nil (car ell)) (cdr ell))
     nil))
 
+(define-type <&who-condition-argument>
+  (or string symbol false))
+
+(define-type <&message-condition-argument>
+  string)
+
+(define-type <type-description>
+  string)
+
+(define-type <type-predicate>
+  (procedure (*) . (boolean)))
+
+(define-type <argument-index>
+  fixnum)
+
 
 ;;;; assertions
 
-(define-syntax assert*
-  (er-macro-transformer
-    (lambda (input-form.stx rename compare)
-      (match input-form.stx
-	((_ ?expr)
-	 (let ((%unless			(rename 'unless))
-	       (%quote			(rename 'quote))
-	       (%assertion-violation	(rename 'unless))
-	       (%__who__		(rename '__who__)))
-	   `(,%unless ,?expr (,%assertion-violation (__who__) "failed assertion" (,%quote ,?expr)))))
-	(_
-	 (syntax-error 'assert* "syntax error in macro use" input-form.stx))))))
-
-
-;;;; predicates
-
-(define (assert-argument-type who type.str type-pred arg arg.idx)
+(: assert-argument-type (<&who-condition-argument> <type-description> <type-predicate> * <argument-index> -> undefined))
+(define (assert-argument-type who type-descr type-pred arg arg.idx)
   ;;Usage example:
   ;;
   ;;  (define* (fold-left combine ell)
@@ -89,10 +92,11 @@
   ;;
   (unless (type-pred arg)
     (assertion-violation who
-      (format #f "expected argument ~a of type \"~a\"" arg.idx type.str)
+      (format #f "expected argument ~a of type \"~a\"" arg.idx type-descr)
       arg)))
 
-(define (assert-argument-type/rest who type.str type-pred rest-arg)
+(: assert-argument-type/rest  (<&who-condition-argument> <type-description> <type-predicate> * -> undefined))
+(define (assert-argument-type/rest who type-descr type-pred rest-arg)
   ;;Usage example:
   ;;
   ;;  (define* (fold-left combine ell . ell*)
@@ -103,25 +107,27 @@
   ;;
   (unless (type-pred rest-arg)
     (assertion-violation who
-      (format #f "expected rest argument of type \"~a\"" type.str)
+      (format #f "expected rest argument of type \"~a\"" type-descr)
       rest-arg)))
 
-(define (assert-argument-list-of-type who type.str type-pred arg* arg.idx)
+(: assert-argument-list-of-type  (<&who-condition-argument> <type-description> <type-predicate> list <argument-index> -> undefined))
+(define (assert-argument-list-of-type who type-descr type-pred arg* arg.idx)
   (fold-left (lambda (item.idx item)
 	       (if (type-pred item)
 		   (+ 1 item.idx)
 		 (assertion-violation who
-		   (string-append "expected item of type \"" type.str "\""
+		   (string-append "expected item of type \"" type-descr "\""
 				  " at index " (number->string item.idx)
 				  " of list argument " (number->string arg.idx))
 		   item)))
     0 arg*))
 
-(define (assert-argument-vector-of-type who type.str type-pred arg-vec arg.idx)
+(: assert-argument-vector-of-type (<&who-condition-argument> <type-description> <type-predicate> vector <argument-index> -> undefined))
+(define (assert-argument-vector-of-type who type-descr type-pred arg-vec arg.idx)
   (unless (vector? arg-vec)
     (assertion-violation who
       (string-append "expected vector as argument \""
-		     type.str
+		     type-descr
 		     "\" at index "
 		     (number->string arg.idx))
       arg-vec))
@@ -129,7 +135,7 @@
       ((= i (vector-length arg-vec)))
     (unless (type-pred (vector-ref arg-vec i))
       (assertion-violation who
-	(string-append "expected item of type \"" type.str "\""
+	(string-append "expected item of type \"" type-descr "\""
 		       " at index " (number->string i)
 		       " of list argument " )
 	arg-vec

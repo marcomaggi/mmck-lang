@@ -462,6 +462,18 @@ tests/test-lang-booleans.$(OBJEXT): tests/test-lang-booleans.scm $(MMCK_CHECK_DE
 tests/test-lang-booleans.exe: tests/test-lang-booleans.$(OBJEXT)
 	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
 
+## --------------------------------------------------------------------
+
+EXTRA_DIST		+= tests/test-lang-assertions.scm
+MMCK_CHECK_OBJECTS	+= tests/test-lang-assertions.$(OBJEXT)
+MMCK_CHECK_PROGS	+= tests/test-lang-assertions.exe
+
+tests/test-lang-assertions.$(OBJEXT): tests/test-lang-assertions.scm $(MMCK_CHECK_DEPS)
+	$(MMCK_CHECK_ENV) $(CSC_COMPILE_OBJECT_STATIC) $(@) $(<)
+
+tests/test-lang-assertions.exe: tests/test-lang-assertions.$(OBJEXT)
+	$(MMCK_CHECK_ENV) $(CSC_LINK_PROGRAM) $(@) $(<)
+
 
 #### wrapping up tests
 
