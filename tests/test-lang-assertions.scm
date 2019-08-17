@@ -47,7 +47,8 @@
       (try
 	  (internal-body
 	    (define* (the-func arg)
-	      (assert-argument-type (__who__) "this-type" string? arg 1)
+	      (begin-checks
+		(assert-argument-type (__who__) "this-type" string? arg 1))
 	      #t)
 	    (the-func "ciao"))
 	(catch E
@@ -62,7 +63,8 @@
       (try
 	  (internal-body
 	    (define* (the-func arg)
-	      (assert-argument-type (__who__) "this-type" string? arg 1)
+	      (begin-checks
+		(assert-argument-type (__who__) "this-type" string? arg 1))
 	      #t)
 	    (the-func 123))
 	(catch E
@@ -89,7 +91,8 @@
 		      obj)))))
 
   (define* (the-func arg . rest)
-    (assert-argument-type/rest (__who__) "this-type" list-of-strings? rest)
+    (begin-checks
+      (assert-argument-type/rest (__who__) "this-type" list-of-strings? rest))
     #t)
 
 ;;; --------------------------------------------------------------------
@@ -125,7 +128,8 @@
 (parameterise ((check-test-name		'list-argument-type))
 
   (define* (the-func arg*)
-    (assert-argument-list-of-type (__who__) "list of strings" string? arg* 1)
+    (begin-checks
+      (assert-argument-list-of-type (__who__) "list of strings" string? arg* 1))
     #t)
 
 ;;; --------------------------------------------------------------------
