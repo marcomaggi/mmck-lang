@@ -36,11 +36,14 @@
 		parameterize)
 	  (only (chicken pretty-print)
 		pretty-print
-		pretty-print-width))
+		pretty-print-width)
+	  (only (chicken type)
+		:))
 
 
 ;;;; printing
 
+(: debug-print (#!rest -> undefined))
 (define (debug-print . args)
   (parameterize ((pretty-print-width 150))
     (pretty-print args (current-error-port))))
