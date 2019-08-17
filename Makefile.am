@@ -68,6 +68,22 @@ MMCK_LANG_IMPORT_SHARED_LIBS	=
 MMCK_LANG_RUNTIME_SHARED_LIBS	= \
 	lib/mmck.lang.$(MMCK_SOEXT)
 
+## --------------------------------------------------------------------
+
+# This is  a list of types  specification files, one for  each module.
+# They are  *not* installed.   They are  concatenated to  generate the
+# globl types file.
+#
+MMCK_LANG_TYPES_FILES_MODULES	=
+
+# This is  a list of the  types specification files.  To  be installed
+# along with shared libraries.
+#
+MMCK_LANG_TYPES_FILES_SHARED_LIBS	= \
+	lib/mmck.lang.types
+
+## --------------------------------------------------------------------
+
 # Temporary  files  we need  for  parallel  builds, ".temp",  ".lock",
 # ".stamp".
 #
@@ -81,6 +97,7 @@ MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.version.$(OBJEXT)
 MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.version.import.scm
 MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.version.import.$(MMCK_SOEXT)
 MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.version.import.$(MMCK_SOEXT)
+MMCK_LANG_TYPES_FILES_MODULES	+= lib/mmck.lang.version.types.scm
 MMCK_LANG_TEMP_FILES		+= \
 	lib/mmck.lang.version.temp				\
 	lib/mmck.lang.version.lock				\
@@ -97,9 +114,12 @@ MMCK_LANG_TEMP_FILES		+= \
 lib/mmck.lang.version.stamp: lib/mmck.lang.version.scm $(MMCK_OBJECTS_DEPS)
 	@rm -f lib/mmck.lang.version.temp
 	@touch lib/mmck.lang.version.temp
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.version.$(OBJEXT) $(<) -prologue lib/config.scm
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.version.$(OBJEXT) $(<) -prologue lib/config.scm \
+		-emit-types-file lib/mmck.lang.version.types.scm
 	@$(MV) mmck.lang.version.import.scm lib/mmck.lang.version.import.scm
 	@mv -f lib/mmck.lang.version.temp $@
+
+lib/mmck.lang.version.types.scm: lib/mmck.lang.version.stamp
 
 lib/mmck.lang.version.import.scm lib/mmck.lang.version.$(OBJEXT): lib/mmck.lang.version.stamp
 	@dry=; for f in x $$MAKEFLAGS; do \
@@ -133,6 +153,7 @@ MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.debug.$(OBJEXT)
 MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.debug.import.scm
 MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.debug.import.$(MMCK_SOEXT)
 MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.debug.import.$(MMCK_SOEXT)
+MMCK_LANG_TYPES_FILES_MODULES	+= lib/mmck.lang.debug.types.scm
 MMCK_LANG_TEMP_FILES		+= \
 	lib/mmck.lang.debug.temp	\
 	lib/mmck.lang.debug.lock	\
@@ -144,9 +165,12 @@ MMCK_LANG_DEBUG_DEPS = \
 lib/mmck.lang.debug.stamp: lib/mmck.lang.debug.scm $(MMCK_LANG_DEBUG_DEPS)
 	@rm -f lib/mmck.lang.debug.temp
 	@touch lib/mmck.lang.debug.temp
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.debug.$(OBJEXT) $(<)
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.debug.$(OBJEXT) $(<) \
+		-emit-types-file lib/mmck.lang.debug.types.scm
 	@$(MV) mmck.lang.debug.import.scm lib/mmck.lang.debug.import.scm
 	@mv -f lib/mmck.lang.debug.temp $@
+
+lib/mmck.lang.debug.types.scm: lib/mmck.lang.debug.stamp
 
 lib/mmck.lang.debug.import.scm lib/mmck.lang.debug.$(OBJEXT): lib/mmck.lang.debug.stamp
 	@dry=; for f in x $$MAKEFLAGS; do \
@@ -180,9 +204,10 @@ MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.core.$(OBJEXT)
 MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.core.import.scm
 MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.core.import.$(MMCK_SOEXT)
 MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.core.import.$(MMCK_SOEXT)
+MMCK_LANG_TYPES_FILES_MODULES	+= lib/mmck.lang.core.types.scm
 MMCK_LANG_TEMP_FILES		+= \
-	lib/mmck.lang.core.temp	\
-	lib/mmck.lang.core.lock	\
+	lib/mmck.lang.core.temp		\
+	lib/mmck.lang.core.lock		\
 	lib/mmck.lang.core.stamp
 
 MMCK_LANG_CORE_DEPS = \
@@ -192,9 +217,12 @@ MMCK_LANG_CORE_DEPS = \
 lib/mmck.lang.core.stamp: lib/mmck.lang.core.scm $(MMCK_LANG_CORE_DEPS)
 	@rm -f lib/mmck.lang.core.temp
 	@touch lib/mmck.lang.core.temp
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.core.$(OBJEXT) $(<)
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.core.$(OBJEXT) $(<) \
+		-emit-types-file lib/mmck.lang.core.types.scm
 	@$(MV) mmck.lang.core.import.scm lib/mmck.lang.core.import.scm
 	@mv -f lib/mmck.lang.core.temp $@
+
+lib/mmck.lang.core.types.scm: lib/mmck.lang.core.stamp
 
 lib/mmck.lang.core.import.scm lib/mmck.lang.core.$(OBJEXT): lib/mmck.lang.core.stamp
 	@dry=; for f in x $$MAKEFLAGS; do \
@@ -228,6 +256,7 @@ MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.assertions.$(OBJEXT)
 MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.assertions.import.scm
 MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.assertions.import.$(MMCK_SOEXT)
 MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.assertions.import.$(MMCK_SOEXT)
+MMCK_LANG_TYPES_FILES_MODULES	+= lib/mmck.lang.assertions.types.scm
 MMCK_LANG_TEMP_FILES		+= \
 	lib/mmck.lang.assertions.temp	\
 	lib/mmck.lang.assertions.lock	\
@@ -241,9 +270,12 @@ MMCK_LANG_ASSERTIONS_DEPS = \
 lib/mmck.lang.assertions.stamp: lib/mmck.lang.assertions.scm $(MMCK_LANG_ASSERTIONS_DEPS)
 	@rm -f lib/mmck.lang.assertions.temp
 	@touch lib/mmck.lang.assertions.temp
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.assertions.$(OBJEXT) $(<)
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.assertions.$(OBJEXT) $(<) \
+		-emit-types-file lib/mmck.lang.assertions.types.scm
 	@$(MV) mmck.lang.assertions.import.scm lib/mmck.lang.assertions.import.scm
 	@mv -f lib/mmck.lang.assertions.temp $@
+
+lib/mmck.lang.assertions.types.scm: lib/mmck.lang.assertions.stamp
 
 lib/mmck.lang.assertions.import.scm lib/mmck.lang.assertions.$(OBJEXT): lib/mmck.lang.assertions.stamp
 	@dry=; for f in x $$MAKEFLAGS; do \
@@ -277,6 +309,7 @@ MMCK_LANG_RUNTIME_OBJECTS	+= lib/mmck.lang.booleans.$(OBJEXT)
 MMCK_LANG_IMPORT_SOURCES	+= lib/mmck.lang.booleans.import.scm
 MMCK_LANG_IMPORT_DEPS		+= lib/mmck.lang.booleans.import.$(MMCK_SOEXT)
 MMCK_LANG_IMPORT_SHARED_LIBS	+= lib/mmck.lang.booleans.import.$(MMCK_SOEXT)
+MMCK_LANG_TYPES_FILES_MODULES	+= lib/mmck.lang.booleans.types.scm
 MMCK_LANG_TEMP_FILES		+= \
 	lib/mmck.lang.booleans.temp	\
 	lib/mmck.lang.booleans.lock	\
@@ -291,9 +324,12 @@ MMCK_LANG_BOOLEANS_DEPS = \
 lib/mmck.lang.booleans.stamp: lib/mmck.lang.booleans.scm $(MMCK_LANG_BOOLEANS_DEPS)
 	@rm -f lib/mmck.lang.booleans.temp
 	@touch lib/mmck.lang.booleans.temp
-	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.booleans.$(OBJEXT) $(<)
+	$(MMCK_LIB_ENV) $(CSC_COMPILE_OBJECT_SHARED) lib/mmck.lang.booleans.$(OBJEXT) $(<) \
+		-emit-types-file lib/mmck.lang.booleans.types.scm
 	@$(MV) mmck.lang.booleans.import.scm lib/mmck.lang.booleans.import.scm
 	@mv -f lib/mmck.lang.booleans.temp $@
+
+lib/mmck.lang.booleans.types.scm: lib/mmck.lang.booleans.stamp
 
 lib/mmck.lang.booleans.import.scm lib/mmck.lang.booleans.$(OBJEXT): lib/mmck.lang.booleans.stamp
 	@dry=; for f in x $$MAKEFLAGS; do \
@@ -375,10 +411,15 @@ CLEANFILES	+= \
 	$(MMCK_LANG_RUNTIME_OBJECTS)		\
 	$(MMCK_LANG_IMPORT_SHARED_LIBS)		\
 	$(MMCK_LANG_IMPORT_SOURCES)		\
+	$(MMCK_LANG_TYPES_FILES_MODULES)	\
+	$(MMCK_LANG_TYPES_FILES_SHARED_LIBS)	\
 	$(MMCK_LANG_TEMP_FILES)
 
 lib/mmck.lang.$(MMCK_SOEXT): $(MMCK_LANG_RUNTIME_OBJECTS)
 	$(MMCK_LIB_ENV) $(CSC_LINK_LIBRARY) $(@) $(^)
+
+lib/mmck.lang.types: $(MMCK_LANG_TYPES_FILES_MODULES)
+	cat $(MMCK_LANG_TYPES_FILES_MODULES) >$@
 
 
 #### shared libraries installation
@@ -393,6 +434,11 @@ MMCK_ALL_IMPORT_SHARED_LIBS	= \
 MMCK_ALL_RUNTIME_SHARED_LIBS	= \
 	$(MMCK_LANG_RUNTIME_SHARED_LIBS)
 
+# All the types specification files that we want to install.
+#
+MMCK_ALL_TYPES_FILES	= \
+	$(MMCK_LANG_TYPES_FILES_SHARED_LIBS)
+
 # These variables are parsed by GNU Automake to build the main library
 # targets and install them under the directory $(MMUX_CHICKEN_LIBDIR).
 #
@@ -405,7 +451,10 @@ MMCK_ALL_RUNTIME_SHARED_LIBS	= \
 # permissions 0644.
 #
 sharedlibdir		= $(MMUX_CHICKEN_LIBDIR)
-sharedlib_SCRIPTS	= $(MMCK_ALL_RUNTIME_SHARED_LIBS) $(MMCK_ALL_IMPORT_SHARED_LIBS)
+sharedlib_SCRIPTS	= \
+	$(MMCK_ALL_RUNTIME_SHARED_LIBS)		\
+	$(MMCK_ALL_IMPORT_SHARED_LIBS)		\
+	$(MMCK_ALL_TYPES_FILES)
 
 
 #### interface to "make check"
