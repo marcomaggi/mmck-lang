@@ -133,9 +133,9 @@
 (define (assert-argument-vector-of-type who type-descr type-pred arg-vec arg.idx)
   (unless (vector? arg-vec)
     (assertion-violation who
-      (string-append "expected vector as argument \""
+      (string-append "expected vector of \""
 		     type-descr
-		     "\" at index "
+		     "\" as argument at index "
 		     (number->string arg.idx))
       arg-vec))
   (do ((i 0 (+ 1 i)))
