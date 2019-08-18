@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# Installation  script to  run from  the  Travis CI  config file  before
+# Installation script to run from the Travis CI config file before
 # attempting a build.
 #
-# Install MMCK Exceptional-Conditions  under the directory "/usr/local".   We assume the
-# script is run from the top directory of the build tree.
+# Install MMCK Exceptional Conditions  under the directory "/usr/local".
+# We assume the script is run from the top directory of the build tree.
 
 PROGNAME=${0##*/}
 PACKAGE_NAME=mmck-exceptional-conditions
